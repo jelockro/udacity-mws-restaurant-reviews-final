@@ -4,24 +4,34 @@ module.exports = function(grunt) {
     responsive_images: {
       dev: {
         options: {
-          engine: 'im',
+//        engine: 'im',
           sizes: [{
-            name: 'small',
-            width: '30%',
-            suffix: '_small',
+            name: 'banner_1x',
+            width: '500w',
+            suffix: '_1x',
             quality: 20
           },{
-            name: 'large',
-            width: '50%',
-            suffix: '_large',
+            name: 'banner_2x',
+            width: '1000w',
+            suffix: '_2x',
+            quality: 40
+          },{
+            name: 'tiles_1x',
+            width: '300w',
+            suffix: '_1x',
+            quality: 20
+          },{
+            name: 'tiles_2x',
+            width: '600w',
+            suffix: '_2x',
             quality: 40
           }]
         },
         files: [{
           expand: true,
           src: ['*.{gif,jpg,png}'],
-          cwd: 'images/',
-          dest: 'images/'
+          cwd: '../img/',
+          dest: '../img/images/'
         }]
       }
     },
