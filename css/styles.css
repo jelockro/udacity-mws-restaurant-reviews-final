@@ -156,7 +156,7 @@ nav h1 a {
   min-height: 380px;
 
   text-align: center;
-  min-width: 270px;
+  min-width: 252px;
 }
 	@media only screen and (min-width: 0px){
 		#restaurants-list li {
@@ -214,6 +214,14 @@ nav h1 a {
   text-decoration: none;
   text-transform: uppercase;
 }
+
+.filter-selects {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+}
+
 
 /* ====================== Restaurant Details ====================== */
 .inside header {
