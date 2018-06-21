@@ -156,8 +156,26 @@ nav h1 a {
   min-height: 380px;
 
   text-align: center;
-  width: 100%;
+  min-width: 270px;
 }
+	@media only screen and (min-width: 0px){
+		#restaurants-list li {
+			max-width: 100%;
+		}
+	}
+	@media only screen and (min-width: 714px){
+		#restaurants-list li {
+			max-width: 45%;
+		}
+	}
+	@media only screen and (min-width: 1032px){
+		#restaurants-list li {
+
+		}
+	}
+
+
+
 #restaurants-list .restaurant-img {
   background-color: #ccc;
   display: block;
