@@ -313,6 +313,21 @@ nav h1 a {
 #reviews-list li p {
   margin: 0 0 10px;
 }
+
+.restaurant-hours-flex {
+	display: flex;
+	justify-content: center;
+	margin: 15px;
+
+}
+
+
+#restaurant-hours tr td:first-of-type {
+	width: 83px;
+}
+#restaurant-hours tr td:last-of-type {
+	width: 60%;
+}
 #restaurant-hours td {
   color: #666;
 }

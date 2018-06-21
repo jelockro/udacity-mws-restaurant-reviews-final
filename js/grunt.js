@@ -7,22 +7,24 @@ module.exports = function(grunt) {
 //        engine: 'im',
           sizes: [{
             name: 'banner_1x',
-            width: '500w',
+            width: 500,
+            height: 167,
             suffix: '_1x',
             quality: 20
           },{
             name: 'banner_2x',
-            width: '1000w',
+            width: 1000,
+            height: 334,
             suffix: '_2x',
             quality: 40
           },{
             name: 'tiles_1x',
-            width: '300w',
+            width: 300,
             suffix: '_1x',
             quality: 20
           },{
             name: 'tiles_2x',
-            width: '600w',
+            width: 600,
             suffix: '_2x',
             quality: 40
           }]
