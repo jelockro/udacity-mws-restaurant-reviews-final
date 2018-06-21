@@ -152,7 +152,7 @@ nav h1 a {
   background-color: #fff;
   border: 2px solid #ccc;
   font-family: Arial,sans-serif;
-	margin: 15px 0px;
+	margin: 15px 15px;
   min-height: 380px;
 
   text-align: center;
@@ -170,7 +170,7 @@ nav h1 a {
 	}
 	@media only screen and (min-width: 1032px){
 		#restaurants-list li {
-
+			max-width: 300px;
 		}
 	}
 
