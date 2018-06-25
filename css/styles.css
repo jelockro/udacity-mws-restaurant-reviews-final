@@ -335,17 +335,18 @@ nav h1 a {
 .restaurant-hours-flex {
 	display: flex;
 	justify-content: center;
-	margin: 15px;
+	/*margin: 15px; */
 
 }
 
-
+/*
 #restaurant-hours tr td:first-of-type {
-	width: 83px;
+	width: 5%;
 }
 #restaurant-hours tr td:last-of-type {
 	width: 60%;
 }
+*/
 #restaurant-hours td {
   color: #666;
 }
