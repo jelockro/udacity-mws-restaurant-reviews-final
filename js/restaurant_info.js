@@ -115,11 +115,11 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
     const row = document.createElement('tr');
 
     const day = document.createElement('td');
-    day.innerHTML = key;
+    day.innerHTML = key.trim();
     row.appendChild(day);
 
     const time = document.createElement('td');
-    time.innerHTML = operatingHours[key];
+    time.innerHTML = operatingHours[key].trim();
     row.appendChild(time);
 
     hours.appendChild(row);
@@ -164,6 +164,7 @@ createReviewHTML = (review) => {
 
   const rating = document.createElement('p');
   rating.innerHTML = `Rating: ${review.rating}`;
+  name.className = 'review-rating';
   li.appendChild(rating);
 
   const comments = document.createElement('p');
