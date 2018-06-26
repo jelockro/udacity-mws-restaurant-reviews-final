@@ -8,13 +8,13 @@ self.addEventListener("install", event => {
         "/index.html",
         "/restaurant.html",
         "/css/styles.css",
-        "/data/restaurant.json",
+      /*  "/data/restaurants.json",
         "/js/",
         "/js/dbhelper.js",
         "/js/main.js",
         "/js/restuarant_info.js",
-        "/img/"
-        "/js/register.js"
+        "/img/",
+        "/js/register.js" */
       ])
       .catch(e => {
         console.log("Opening Caches Failed: " + e);
@@ -25,21 +25,25 @@ self.addEventListener("install", event => {
 
 self.addEventListener("fetch", event => {
   let cacheRequest = event.request;
-  let cacheUrlObj = new URL(event.requet.url);
+  let cacheUrlObj = new URL(event.request.url);
+  console.log("request index: " + event.request.url)
+  let indexTest = event.request.url.indexOf("restaurant.html");
+  console.log("indexTest: " + indexTest);
   if (event.request.url.indexOf("restaurant.html") > -1) {
-    const cancheUrl = "restaurant.html";
-    cacheReqeust = new Reqeust(cacheUrl);
+    const cacheUrl = "restaurant.html";
+    console.log("cacheUrl");
+    cacheRequest = new Request(cacheUrl);
   }
   if (cacheUrlObj.hostname !== "localhost") {
     event.request.mode = "no-cors";
   }
 
   event.respondWith(
-    caches.match(cacheReqeust).then(response => {
+    caches.match(cacheRequest).then(response => {
       return (response || fetch(event.request)
         .then(fetchResponse => {
           return caches.open(cacheID).then(cache => {
-            cache.put(event.request.fetchResponse.clone());
+            cache.put(event.request, fetchResponse.clone());
             return fetchResponse;
           });
         })
