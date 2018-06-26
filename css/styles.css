@@ -98,7 +98,7 @@ nav h1 a {
 
 /* Add a color to all links inside the list */
 #breadcrumb li a {
-    color: #0275d8;
+    color: #0275ff;
     text-decoration: none;
 }
 
@@ -354,4 +354,8 @@ nav h1 a {
 */
 #restaurant-hours td {
   color: #666;
+}
+
+.leaflet-container a {
+    color: #0079f4;
 }
