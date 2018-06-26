@@ -30,18 +30,25 @@
   <!-- Beginning main -->
   <main id="maincontent">
     <!-- Beginning map -->
-    <section id="map-container">
+    <section id="map-container" aria-labelledby="map-aria-description" role="application">
       <div id="map"></div>
     </section>
+    <label id="map-aria-description" class="map-aria-description">Google map application</label>
     <!-- End map -->
     <!-- Beginning restaurant -->
     <section id="restaurant-container">
-      <h1 id="restaurant-name"></h1>
+      <h2 id="restaurant-name"></h2>
       <img id="restaurant-img">
       <p id="restaurant-cuisine"></p>
-      <p id="restaurant-address"></p>
+    </section>
+
+    <section id="restaurant-address-and-hours">
+      <p id="restaurant-address" aria-labelledby="restaurant-address-label"></p>
+      <label id="restaurant-address-label" class="restaurant-info-label">address</label>
       <div class="restaurant-hours-flex">
-      <table id="restaurant-hours"></table>
+      <table id="restaurant-hours" aria-labelledby="restaurant-hours-label"></table>
+      <label id="restaurant-hours-label" class="restaurant-info-label">hours</label>
+
       </div>
     </section>
     <!-- end restaurant -->
