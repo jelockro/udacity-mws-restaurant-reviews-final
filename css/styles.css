@@ -339,6 +339,11 @@ nav h1 a {
 
 }
 
+.restaurant-info-label {
+	visibility: hidden;
+}
+
+
 /*
 #restaurant-hours tr td:first-of-type {
 	width: 5%;
