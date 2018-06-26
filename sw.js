@@ -4,17 +4,14 @@ self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(cacheID).then(cache => {
       return cache.addAll([
-        "/",
         "/index.html",
         "/restaurant.html",
         "/css/styles.css",
-      /*  "/data/restaurants.json",
-        "/js/",
+        "/data/restaurants.json",
         "/js/dbhelper.js",
         "/js/main.js",
-        "/js/restuarant_info.js",
-        "/img/",
-        "/js/register.js" */
+        "/js/restaurant_info.js",
+        "/js/register.js" 
       ])
       .catch(e => {
         console.log("Opening Caches Failed: " + e);
@@ -26,12 +23,9 @@ self.addEventListener("install", event => {
 self.addEventListener("fetch", event => {
   let cacheRequest = event.request;
   let cacheUrlObj = new URL(event.request.url);
-  console.log("request index: " + event.request.url)
   let indexTest = event.request.url.indexOf("restaurant.html");
-  console.log("indexTest: " + indexTest);
   if (event.request.url.indexOf("restaurant.html") > -1) {
     const cacheUrl = "restaurant.html";
-    console.log("cacheUrl");
     cacheRequest = new Request(cacheUrl);
   }
   if (cacheUrlObj.hostname !== "localhost") {
