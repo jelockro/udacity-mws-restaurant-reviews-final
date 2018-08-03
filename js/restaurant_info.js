@@ -89,9 +89,10 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   const image = document.getElementById('restaurant-img');
   image.className = 'restaurant-img'
   const imgurlbase = DBHelper.imageUrlForRestaurant(restaurant, 'banners');
-  const imgparts = imgurlbase.split('.');
-  const imgurl1x = imgparts[0] + '-banner_1x.' + imgparts[1];
-  const imgurl2x = imgparts[0] + '-banner_2x.' + imgparts[1];
+  const imgparts = imgurlbase.split('/');
+  //console.log(imgparts);
+  const imgurl1x = "/img/banners/" + imgparts[3] + '-banner_1x.jpg';
+  const imgurl2x = "/img/banners/" + imgparts[3] + '-banner_2x.jpg'
   image.src = imgurl1x;
   image.srcset = imgurl1x +' 300w, ' + imgurl2x + ' 600w';
   image.alt = restaurant.name + ' restaurant promotional image';
