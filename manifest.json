@@ -1,0 +1,9 @@
+{
+  "short_name": "EatReviews",
+  "name": "Restaurant Reviews",
+  "start_url": "/maps/?source=pwa",
+  "background_color": "#252831",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#252831"
+}

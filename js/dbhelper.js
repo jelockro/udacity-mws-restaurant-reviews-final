@@ -38,9 +38,9 @@ class DBHelper {
     fetchURL = DBHelper.DATABASE_URL;
     fetch(fetchURL).then(response => response.json())
       .then(restaurants => {
-        console.log("restaurants JSON: ", restaurants);
+        //console.log("restaurants JSON: ", restaurants);
         callback(null, restaurants);
-        debugger;
+        //debugger;
       }).catch(e => {
           callback(`Request failed. Returned ${e}`, null);
       });

@@ -1,3 +1,5 @@
+import idb from 'idb';
+
 var cacheID = "mws-restaurant-stage-1";
 
 self.addEventListener("install", event => {
