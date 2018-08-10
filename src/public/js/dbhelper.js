@@ -44,8 +44,8 @@ class DBHelper {
       }).catch(e => {
           callback(`Request failed. Returned ${e}`, null);
       });
-    }
-
+  };
+  
 
   /**
    * Fetch a restaurant by its ID.

@@ -13,33 +13,10 @@ if (!self.indexedDB) {
 
 // opening database
 var db;
-var request = self.indexedDB.open('mws_DB', 2);
+var request = self.indexedDB.open('mws_DB', 1);
 
 request.onsuccess = event => {
-  var restaurants = [
-        {id: 1, name: 'Red Men T-Shirt', price: '$3.99'},
-        {id: 2, name: 'Pink Women Shorts', price: '$5.99'},
-        {id: 3, name: 'Nike white Shoes', price: '$300'}
-    ];
   console.log('[onsuccess]', request.result);
-  db = event.target.result; //<- = request.result, event.target is same as `request`
-  // create transaction from database
-  var transaction = db.transaction('restaurants', 'readwrite'); //<- transaction on the store restaurants
-  // add success event handler for transaction
-  transaction.onsucess = event => console.log('[Transaction] ALL DONE!');
-  transaction.onabort = event => console.log('[abort]', event);
-  transaction.onerror = event => console.log('[error]', event);
-  // get store from transaction
-  // returns IDBObjectStore instance
-  var restaurantStore = transaction.objectStore('restaurants');
-  // put restaurants data in restaurantStore
-  restaurants.forEach(restaurant => {
-    var db_op_req = restaurantStore.add(restaurant);// IDBRequest
-    db_op_req.onsuccess = event => console.log(event.target.result == restaurant.id); //true
-    db_op_req.onerror = event => console.log('[db_op_req]:', event);
-    
-    }); 
-  
 };
 
 //error handler
@@ -88,15 +65,13 @@ self.addEventListener("install", event => {
 });
 
 self.addEventListener("fetch", event => {
+  //clone request
   let copyRequest = event.request.clone();
-  let cacheUrlObj = new URL(event.request.url);
-  let indexTest = event.request.url.indexOf("restaurant.html");
-  if (event.request.url.indexOf("restaurant.html") > -1) {
-    const cacheUrl = "restaurant.html";
-    cacheRequest = new Request(cacheUrl);
-  }
-  const checkURL = new URL(copyRequest.url);
+  console.log("copyRequest looks like: ", copyRequest);
   
+  // check url of request because right now 
+  // we only want to work on requests to localhost.port 1337
+  const checkURL = new URL(copyRequest.url);
   console.log(checkURL);
   if (checkURL.port === "1337") {
     const parts = checkURL.pathname.split('/');
@@ -107,8 +82,62 @@ self.addEventListener("fetch", event => {
     console.log("id: ", id);
     console.log("checkURL.port: ", checkURL.port);
 
-  } else {
-    //console.log("not port 1337: ", checkURL.port);
-  }
+    fetch(copyRequest).then(response => response.json())
+      .then(restaurants => {
+        console.log("restaurants JSON: ", restaurants);
+        // At this poine we have an array of length 10.  
+        // now iterate through the list and add to indexedDB
+        
+        // run console statement to see if database is null
+        //console.log('db is:', db); <!-- db is open
+
+        // run console statement to see if the transaction is open
+        console.log('db transaction is:', transaction);
+        // transaction does not exist so let's create one.
+        var transaction = db.transaction('restaurants', 'readwrite'); //<- transaction on the store restaurants
+        console.log('db transaction is:', transaction);
+        // add success event handler for transaction
+        transaction.onsucess = event => console.log('[Transaction] ALL DONE!');
+        transaction.onabort = event => console.log('[abort]', event);
+        transaction.onerror = event => console.log('[error]', event);
+        
+        // get store from transaction
+        // returns IDBObjectStore instance
+        var restaurantStore = transaction.objectStore('restaurants');
+        // put restaurants data in restaurantStore
+        restaurants.forEach(restaurant => {
+          var db_op_req = restaurantStore.add(restaurant);// IDBRequest
+          db_op_req.onsuccess = event => console.log(event.target.result == restaurant.id); //true
+          db_op_req.onerror = event => console.log('[db_op_req]:', event);
+          
+        }); 
+
+       
+      }).catch(e => {
+          console.log(`Request failed. Returned ${e}`, null);
+      });
+  
+  };
 });
+  //let copyRequestJson =  copyRequest.json();
+ 
+  //console.log("copyRequestJson looks like: ", copyRequestJson);
+  //then(response => response.json())
+  //     .then(restaurants => {
+  // let cacheUrlObj = new URL(event.request.url);
+  // let indexTest = event.request.url.indexOf("restaurant.html");
+  // if (event.request.url.indexOf("restaurant.html") > -1) {
+  //   const cacheUrl = "restaurant.html";
+  //   cacheRequest = new Request(cacheUrl);
+  // }
+
+  // }
+
+
+
+
+//    else {
+//     //console.log("not port 1337: ", checkURL.port);
+//   }
+// });
 
