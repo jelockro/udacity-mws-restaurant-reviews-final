@@ -1,5 +1,5 @@
 {
-  "name": "reponsive-images",
+  "name": "mws-1",
   "version": "0.1.0",
   "repository": {
     "type": "git",
@@ -10,22 +10,24 @@
     "babel-core": "^6.26.3",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-html-import-to-string": "0.0.1",
+    "babel-preset-es2015": "^6.24.1",
     "babelify": "^8.0.0",
     "browserify": "^16.2.2",
     "del": "^3.0.0",
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.0",
     "gulp-autoprefixer": "^5.0.0",
     "gulp-clean-css": "^3.9.4",
     "gulp-concat": "^2.6.1",
     "gulp-rename": "^1.4.0",
     "gulp-sourcemaps": "^2.6.4",
     "gulp-uglify": "^3.0.1",
-    "gulp4": "^4.0.2",
     "source": "0.0.3",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0"
   },
   "dependencies": {
+    "compression": "^1.7.3",
+    "express": "^4.16.3",
     "grunt-responsive-images": "^0.1.6",
     "idb": "^2.1.3",
     "nodemon": "^1.18.3"
@@ -33,7 +35,7 @@
   "main": "index.js",
   "scripts": {
     "start:dev": "node ./build/server.js",
-    "build": "gulp4",
-    "start": "node server.js"
+    "build": "gulp",
+    "start": "node ./src/server.js"
   }
 }

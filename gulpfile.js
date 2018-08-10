@@ -2,7 +2,7 @@ const del = require('del');
 const browserify = require('browserify');
 const source = require('vinyl-source-stream');
 const buffer = require('vinyl-buffer');
-const gulp = require('gulp4');
+const gulp = require('gulp');
 const autoprefixer = require('gulp-autoprefixer');
 const clean_css = require('gulp-clean-css');
 const concat = require('gulp-concat');
@@ -21,7 +21,7 @@ const build_html = () => {
         .pipe(gulp.dest(`${dirs.dest}/public/`));
 }
 
-const build_css = () => {
+const build_css = (source) => {
     return gulp.src([
         `${dirs.src}/public/css/styles.css`
         ])
@@ -61,8 +61,8 @@ const build_script = (filename) => {
         .pipe(gulp.dest(`${dirs.dest}/public/js`));
 }
 
-const build_script_index = () => build_script('index.js');
-const build_script_restaurant = () => build_script('restaurant.js');
+const build_script_index = () => build_script('main.js');
+const build_script_restaurant = () => build_script('restaurant_info.js');
 
 const build_scripts = gulp.parallel(build_script_index, build_script_restaurant);
 
@@ -71,7 +71,7 @@ const copy_static = () => {
         `${dirs.src}/public/**/*.json`,
         `${dirs.src}/public/img/*`,
         `${dirs.src}/server.js`,
-        `${dirs.src}/public/js/service_worker.js`
+        `${dirs.src}/public/sw.js`
     ],  {base: dirs.src}) 
     .pipe(gulp.dest(`${dirs.dest}`));
 };
