@@ -1,3 +1,4 @@
+const babelPolyfill = require("babel-polyfill");
 const del = require('del');
 const browserify = require('browserify');
 const source = require('vinyl-source-stream');
@@ -84,3 +85,17 @@ gulp.task('watch', () => {
 gulp.task('default', gulp.series(build_all, 'watch'), () => {
     console.log('Development started');
 });
+
+gulp.task('sw', () => {
+    const b = browserify({
+        debug: true
+    });
+
+    return b
+    .transform('babelify')
+    .require(`${dirs.src}/public/sw.js`, { entry: true })
+    .bundle()
+    .pipe(source('sw.js'))
+    .pipe(gulp.dest(`${dirs.dest}/public`));
+});
+

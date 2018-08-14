@@ -1,9 +1,21 @@
 {
   "short_name": "EatReviews",
   "name": "Restaurant Reviews",
-  "start_url": "/maps/?source=pwa",
+  "start_url": ".",
   "background_color": "#252831",
   "display": "standalone",
-  "scope": "/",
-  "theme_color": "#252831"
+  "scope": "./",
+  "theme_color": "#252831",
+  "icons": [
+  {
+    "src": "/img/icons-192.png",
+    "type": "image/png",
+    "sizes": "192x192"
+  },
+  {
+    "src": "/img/icons-512.png",
+    "type": "image/png",
+    "sizes": "512x512"
+  }
+]
 }

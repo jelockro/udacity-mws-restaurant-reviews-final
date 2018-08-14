@@ -1,6 +1,9 @@
 /**
  * Common database helper functions.
  */
+const dbName = 'mws_DB';
+const version = 3; 
+const storeName = 'restaurants';
 class DBHelper {
 
   /**
@@ -11,52 +14,124 @@ class DBHelper {
     const port = 1337; // Change this to your server port
     return `http://localhost:${port}/restaurants`;
   }
-
-  /**
-   * Fetch all restaurants.
-   */
- /**   
-  *  Old XHR *
-  static fetchRestaurants(callback) {
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', DBHelper.DATABASE_URL);
-    xhr.onload = () => {
-      if (xhr.status === 200) { // Got a success response from server!
-        const json = JSON.parse(xhr.responseText);
-        const restaurants = json.restaurants;
-        callback(null, restaurants);
-      } else { // Oops!. Got an error from server.
-        const error = (`Request failed. Returned status of ${xhr.status}`);
-        callback(error, null);
-      }
-    };
-    xhr.send();
+   
+  //  I'm creating a static function to open the indexedDB database
+  static openDB() {
+    return idb.open(dbName, version, upgradeDB => {
+      debugger;
+      const store = upgradeDB.createObjectStore('restaurants', { keyPath: 'id' }); 
+      store.createIndex('name', 'name', { unique: false }); 
+      });
   }
-*/
+
   static fetchRestaurants(callback) {
-    let fetchURL;
-    fetchURL = DBHelper.DATABASE_URL;
-    fetch(fetchURL).then(response => response.json())
-      .then(restaurants => {
+    //let restaurantsJson;
+    //let restaurants;
+    const fetchURL = DBHelper.DATABASE_URL;
+    
+    if (!window.indexedDB) {
+      console.log("Your browser doesn't support a stable version of IndexedDB.");
+      fetch(fetchURL).then(response => response.json())
+        .then(restaurants => {
         //console.log("restaurants JSON: ", restaurants);
         callback(null, restaurants);
         //debugger;
       }).catch(e => {
           callback(`Request failed. Returned ${e}`, null);
       });
-  };
+    } 
+    
+    // **** PROMISE Section ************************************
+    // now we will begin opening a database and preparing for either
+    // populating it, or fetching from it.
+    // ***************************************
   
+    const shit = new Promise((resolve, reject) => DBHelper.openDB() //<- the function is a chain
+      
+      .then(db => { //we are going to open a transaction and an object store
+      // if there is already a database we will .getall 
+        console.log('[openDB().then(db)] :', db); 
+        
+        if (db) {
+          //console.log('[inside the if(db) of Promise]');
+          //console.log('StoreName:', storeName);
+          var transaction = db.transaction(storeName, 'readwrite');
+          //console.log('[inside the if(db) of Promise] transaction:', transaction);
+          var restaurantStore = transaction.objectStore(storeName); //open the objet store
+          //console.log('[inside the if(db) of Promise] restaurantStore:', restaurantStore);
+          return restaurantStore.getAll();
+        }
+        else {
+        //  otherwise we will return an empty list to be populated
+        console.log('after if (db): does this part of code get touched?');
+        return [];
+       //console.log('[storeConnection:transaction.objectStore:] :', restaurantStore);
+       // db is closed at this point. ******
+        }
+      })
+      
+      .then(async restaurants => { // ???Why is restaurants undefined????
+        // now we want to iterate through this list so we can serve up the restaurant requested
+        // it is possible at this point we are receiving a .getall or an empty list
+        // we need an if statement to first handle the empty list
+          //debugger;
+          console.log('is this an array of restaurants? ->', restaurants);
+          if (!restaurants || restaurants.length === 0) {
+            // start populating the list with our async/await fetch code 
+            await fetch(fetchURL)
+              .then(response => response.json())
+                .then(async restaurantsjson => {
+                  //console.log('[restaurantsjson.then]', restaurantsjson);
+                  
+                  const db = await DBHelper.openDB();
+                  console.log('storeName:', storeName);
+                  const transaction = await db.transaction(storeName, 'readwrite');
+                  restaurantsjson.forEach(restaurant => {
+                      //console.log('[restaurant] :', restaurant);
+                      transaction.objectStore(storeName)
+                      .put(restaurant);
+                      //console.log('[after put]: Success!');
+                    }
+                  );
+                });            
+          }          
+          resolve(restaurants);        
+      }));  // this ends the async restaurants functional code which returned restaurants 
+        
+   shit.then(restaurants => {
+          //console.log('[resolve statement]: restaurants', restaurants);
+          callback(null, restaurants);      
+        }, error => {
+          console.log('[for reals, theres errs?]: error:', error);
+        });    
+    // **** End Promise Section *****
+    // **************************************
+  }
+
 
   /**
    * Fetch a restaurant by its ID.
    */
   static fetchRestaurantById(id, callback) {
     // fetch all restaurants with proper error handling.
+    //debugger;
     DBHelper.fetchRestaurants((error, restaurants) => {
+      //debugger;
       if (error) {
+        //debugger;
         callback(error, null);
       } else {
-        const restaurant = restaurants.find(r => r.id == id);
+        // console.log('[fecthbyid]:id:', id);
+        // let idtype = typeof(id);
+        // console.log('[fetchbyid]:argumentidtype:', idtype);
+        // console.log('[fetchbyid]:restaurants:', restaurants);
+        // restaurants.forEach(r => {
+        //   console.log('ids', r.id);
+        //   let idtype = typeof(id);
+        //   console.log('[fetchbyid]:indb:idtype:', idtype);
+        // });
+        const restaurant = restaurants.find(r => r.id === parseInt(id, 10));
+        //debugger;
         if (restaurant) { // Got the restaurant
           callback(null, restaurant);
         } else { // Restaurant does not exist in the database
@@ -76,7 +151,7 @@ class DBHelper {
         callback(error, null);
       } else {
         // Filter restaurants to have only given cuisine type
-        const results = restaurants.filter(r => r.cuisine_type == cuisine);
+        const results = restaurants.filter(r => r.cuisine_type === cuisine);
         callback(null, results);
       }
     });
@@ -92,7 +167,7 @@ class DBHelper {
         callback(error, null);
       } else {
         // Filter restaurants to have only given neighborhood
-        const results = restaurants.filter(r => r.neighborhood == neighborhood);
+        const results = restaurants.filter(r => r.neighborhood === neighborhood);
         callback(null, results);
       }
     });
@@ -107,12 +182,12 @@ class DBHelper {
       if (error) {
         callback(error, null);
       } else {
-        let results = restaurants
-        if (cuisine != 'all') { // filter by cuisine
-          results = results.filter(r => r.cuisine_type == cuisine);
+        let results = restaurants;
+        if (cuisine !== 'all') { // filter by cuisine
+          results = results.filter(r => r.cuisine_type === cuisine);
         }
-        if (neighborhood != 'all') { // filter by neighborhood
-          results = results.filter(r => r.neighborhood == neighborhood);
+        if (neighborhood !== 'all') { // filter by neighborhood
+          results = results.filter(r => r.neighborhood === neighborhood);
         }
         callback(null, results);
       }
@@ -129,9 +204,9 @@ class DBHelper {
         callback(error, null);
       } else {
         // Get all neighborhoods from all restaurants
-        const neighborhoods = restaurants.map((v, i) => restaurants[i].neighborhood)
+        const neighborhoods = restaurants.map((v, i) => restaurants[i].neighborhood);
         // Remove duplicates from neighborhoods
-        const uniqueNeighborhoods = neighborhoods.filter((v, i) => neighborhoods.indexOf(v) == i)
+        const uniqueNeighborhoods = neighborhoods.filter((v, i) => neighborhoods.indexOf(v) === i);
         callback(null, uniqueNeighborhoods);
       }
     });
@@ -147,9 +222,9 @@ class DBHelper {
         callback(error, null);
       } else {
         // Get all cuisines from all restaurants
-        const cuisines = restaurants.map((v, i) => restaurants[i].cuisine_type)
+        const cuisines = restaurants.map((v, i) => restaurants[i].cuisine_type);
         // Remove duplicates from cuisines
-        const uniqueCuisines = cuisines.filter((v, i) => cuisines.indexOf(v) == i)
+        const uniqueCuisines = cuisines.filter((v, i) => cuisines.indexOf(v) === i);
         callback(null, uniqueCuisines);
       }
     });
@@ -192,5 +267,47 @@ class DBHelper {
     );
     return marker;
   } */
+ 
+  /**
+   * Fetch all restaurants.
+   */
+ /**   
+  *  Old XHR *
+  static fetchRestaurants(callback) {
+    let xhr = new XMLHttpRequest();
+    xhr.open('GET', DBHelper.DATABASE_URL);
+    xhr.onload = () => {
+      if (xhr.status === 200) { // Got a success response from server!
+        const json = JSON.parse(xhr.responseText);
+        const restaurants = json.restaurants;
+        callback(null, restaurants);
+      } else { // Oops!. Got an error from server.
+        const error = (`Request failed. Returned status of ${xhr.status}`);
+        callback(error, null);
+      }
+    };
+    xhr.send();
+  }
+*/
+
+// //console.log(self.indexedDB);
+// // i think this code is only run once when the service worker is activated
+// // so I think that if I want service worker code to be run it needs to be done inside an eventlistener
+
+
+// if (!self.indexedDB) {
+//   console.log('Your browser doesn\'t support a stable version of IndexedDB.');
+// } else console.log('I see indexedDB');
+
+
+
+// openDB();
+
+// opening database on activate sequence
+// self.addEventListener('activate', event => {
+//   event.waitUntil(
+//     db = openDB()
+//     );
+// });
 
 }
