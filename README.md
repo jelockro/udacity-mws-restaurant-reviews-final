@@ -1,32 +1,57 @@
-# Mobile Web Specialist Certification Course
----
-#### _Three Stage Course Material Project - Restaurant Reviews_
+# mws-restaurant-stage2
 
-## Project Overview: Stage 1
+This the second out of 3 stage udacity mobile web development project.  In this stage the goal is to create a web-app that has offline capabilities and passes the following lighthouse scores:
+Progressive Web App: >90
+Performance: >70
+Accessibility: >90
 
-For the **Restaurant Reviews** projects, you will incrementally convert a static webpage to a mobile-ready web application. In **Stage One**, you will take a static design that lacks accessibility and convert the design to be responsive on different sized displays and accessible for screen reader use. You will also add a service worker to begin the process of creating a seamless offline experience for your users.
+## Getting Started
 
-### Specification
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
-You have been provided the code for a restaurant reviews website. The code has a lot of issues. It’s barely usable on a desktop browser, much less a mobile device. It also doesn’t include any standard accessibility features, and it doesn’t work offline at all. Your job is to update the code to resolve these issues while still maintaining the included functionality. 
+### Prerequisites
 
-### What do I do from here?
+What things you need to install the software and how to install them
 
-1. In this folder, start up a simple HTTP server to serve up the site files on your local computer. Python has some simple tools to do this, and you don't even need to know Python. For most people, it's already installed on your computer. 
+1. Install Node if you don't already have it. It can be downloaded here: https://nodejs.org/en/download/
 
-In a terminal, check the version of Python you have: `python -V`. If you have Python 2.x, spin up the server with `python -m SimpleHTTPServer 8000` (or some other port, if port 8000 is already in use.) For Python 3.x, you can use `python3 -m http.server 8000`. If you don't have Python installed, navigate to Python's [website](https://www.python.org/) to download and install the software.
+2. Install Gulp as a global module after you have the node package manager through the command-line/terminal
+```
+sudo npm install --global gulp
+```
+3. clone this repository
 
-2. With your server running, visit the site: `http://localhost:8000`, and look around for a bit to see what the current experience looks like.
-3. Explore the provided code, and start making a plan to implement the required features in three areas: responsive design, accessibility and offline use.
-4. Write code to implement the updates to get this site on its way to being a mobile-ready website.
+### Installing
 
-## Leaflet.js and Mapbox:
+In order to get the development environment up and running first install all the dependencies
 
-This repository uses [leafletjs](https://leafletjs.com/) with [Mapbox](https://www.mapbox.com/). You need to replace `<your MAPBOX API KEY HERE>` with a token from [Mapbox](https://www.mapbox.com/). Mapbox is free to use, and does not require any payment information. 
+```
+npm i
+```
 
-### Note about ES6
+then to run the development server
 
-Most of the code in this project has been written to the ES6 JavaScript specification for compatibility with modern web browsers and future proofing JavaScript code. As much as possible, try to maintain use of ES6 in any additional JavaScript you write. 
+```
+npm run start:dev
+```
+
+If you would like to run the production server, first build the app:
+
+```
+npm run build
+```
+
+and then start the server
+
+```
+npm run start 
+```
+
+## Authors
+
+* **Josh Lockrow** - *Initial work* - [jelockro ](https://github.com/jelockro)
 
 
+## License
 
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
