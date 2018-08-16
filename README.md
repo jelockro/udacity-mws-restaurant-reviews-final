@@ -15,9 +15,9 @@ What things you need to install the software and how to install them
 
 1. Install Node if you don't already have it. It can be downloaded here: https://nodejs.org/en/download/
 
-2. Install Gulp as a global module after you have the node package manager through the command-line/terminal
+2. Install Gulp and its command line interface as global modules after you have the node package manager through the command-line/terminal
 ```
-sudo npm install --global gulp
+sudo npm install --global gulp gulp-cli
 ```
 3. clone this repository
 
