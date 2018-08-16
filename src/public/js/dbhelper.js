@@ -27,6 +27,7 @@ class DBHelper {
   static fetchRestaurants(callback) {
     //let restaurantsJson;
     //let restaurants;
+    debugger;
     const fetchURL = DBHelper.DATABASE_URL;
     
     if (!window.indexedDB) {
@@ -114,7 +115,7 @@ class DBHelper {
    */
   static fetchRestaurantById(id, callback) {
     // fetch all restaurants with proper error handling.
-    //debugger;
+    debugger;
     DBHelper.fetchRestaurants((error, restaurants) => {
       //debugger;
       if (error) {
@@ -146,6 +147,7 @@ class DBHelper {
    */
   static fetchRestaurantByCuisine(cuisine, callback) {
     // Fetch all restaurants  with proper error handling
+    debugger;
     DBHelper.fetchRestaurants((error, restaurants) => {
       if (error) {
         callback(error, null);
@@ -162,6 +164,7 @@ class DBHelper {
    */
   static fetchRestaurantByNeighborhood(neighborhood, callback) {
     // Fetch all restaurants
+    debugger;
     DBHelper.fetchRestaurants((error, restaurants) => {
       if (error) {
         callback(error, null);
@@ -178,6 +181,7 @@ class DBHelper {
    */
   static fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, callback) {
     // Fetch all restaurants
+    debugger;
     DBHelper.fetchRestaurants((error, restaurants) => {
       if (error) {
         callback(error, null);
@@ -199,6 +203,7 @@ class DBHelper {
    */
   static fetchNeighborhoods(callback) {
     // Fetch all restaurants
+    debugger;
     DBHelper.fetchRestaurants((error, restaurants) => {
       if (error) {
         callback(error, null);

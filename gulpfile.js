@@ -9,20 +9,20 @@ const clean_css = require('gulp-clean-css');
 const concat = require('gulp-concat');
 const sourcemaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
+const babelify = require('babelify');
 
 const dirs = {
     src: 'src',
     dest: 'build'
-}
+};
 
-const clean = () => del(['build']);  // del requires it to be a string and not a variable
-
+const clean = () => del(['build']);  
 const build_html = () => {
     return gulp.src([ `${dirs.src}/public/*.html` ])
         .pipe(gulp.dest(`${dirs.dest}/public/`));
-}
+};
 
-const build_css = (source) => {
+const build_css_source = (source) => {
     return gulp.src([
         `${dirs.src}/public/css/styles.css`
         ])
@@ -30,7 +30,7 @@ const build_css = (source) => {
         .pipe(autoprefixer('last 2 versions'))
         .pipe(concat(`${source}.min.css`))
         .pipe(gulp.dest(`${dirs.dest}/public/css`));
-}
+};
 
 
 // const build_css_source = (source) => {
@@ -45,13 +45,13 @@ const build_css = (source) => {
 //         .pipe(gulp.dest(`${dirs.dest}/public/css`));
 // }
 
-//const build_css_index = () => build_css_source('index');
-//const build_css_restaurant = () => build_css_source('restaurant');
+const build_css_index = () => build_css_source('index');
+const build_css_restaurant = () => build_css_source('restaurant');
 
-//const build_css = gulp.series(build_css_index, build_css_restaurant);
+const build_css = gulp.series(build_css_index, build_css_restaurant);
 
 const build_script = (filename) => {
-    return browserify(`${dirs.src}/public/js/${filename}`)
+    return browserify(`${dirs.src}/public/js/${filename}`, { debug: true })
         .transform('babelify')
         .bundle()
         .pipe(source(filename))
@@ -60,7 +60,19 @@ const build_script = (filename) => {
         .pipe(uglify())
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest(`${dirs.dest}/public/js`));
-}
+};
+
+const build_sw = () => {
+   return browserify(`${dirs.src}/public/sw.js`, { debug: true })
+    .transform('babelify')
+    .bundle()
+    .pipe(source('sw.js'))
+    .pipe(buffer())
+    .pipe(sourcemaps.init({ loadMaps: true }))
+    .pipe(uglify())
+    .pipe(sourcemaps.write('./'))
+    .pipe(gulp.dest(`${dirs.dest}/public`));
+};
 
 const build_script_index = () => build_script('main.js');
 const build_script_restaurant = () => build_script('restaurant_info.js');
@@ -71,31 +83,18 @@ const copy_static = () => {
     return gulp.src([
         `${dirs.src}/public/**/*.json`,
         `${dirs.src}/public/img/*`,
-        `${dirs.src}/server.js`,
-        `${dirs.src}/public/sw.js`
+        `${dirs.src}/server.js`
+        //`${dirs.src}/public/sw.js`
     ],  {base: dirs.src}) 
     .pipe(gulp.dest(`${dirs.dest}`));
 };
 
-const build_all = gulp.series(clean, build_html, build_css, build_scripts, copy_static);
+const build_all = gulp.series(clean, build_html, build_css, build_scripts, build_sw, copy_static);
 gulp.task('watch', () => {
-    gulp.watch([dirs.src], build_all)
+    gulp.watch([dirs.src], build_all);
 });
 
 gulp.task('default', gulp.series(build_all, 'watch'), () => {
     console.log('Development started');
-});
-
-gulp.task('sw', () => {
-    const b = browserify({
-        debug: true
-    });
-
-    return b
-    .transform('babelify')
-    .require(`${dirs.src}/public/sw.js`, { entry: true })
-    .bundle()
-    .pipe(source('sw.js'))
-    .pipe(gulp.dest(`${dirs.dest}/public`));
 });
 

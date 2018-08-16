@@ -1,9 +1,9 @@
 {
-  "name": "mws-1",
-  "version": "0.1.0",
+  "name": "mws-2",
+  "version": "0.2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jelockro/mws-restaurant-stage-1.git"
+    "url": "https://github.com/jelockro/mws-restaurant-stage2.git"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-rc.1",
