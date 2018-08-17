@@ -7,6 +7,8 @@ const app = express();
 app.use(compression());
 app.use('/sw.js', (req, res) => res.sendFile(path.join(__dirname, 'public/sw.js')));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public/js')));
+app.use(express.static(path.join(__dirname, 'public/css')));
 
 app.listen(8000, () => {
     console.log('Restaurant Reviews listening on port 8000!');

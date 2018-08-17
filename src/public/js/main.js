@@ -1,7 +1,7 @@
-import 'babel-polyfill';
-import register from './register';
-import idb from 'idb';
-import DBHelper from './dbhelper';
+// import 'babel-polyfill';
+// import register from './register';
+// import idb from 'idb';
+//var DBHelper = require('./dbhelper');
 
 let restaurants,
   neighborhoods,
@@ -16,7 +16,7 @@ var markers = []
 const fetchNeighborhoods = () => {
   DBHelper.fetchNeighborhoods((error, neighborhoods) => {
     if (error) { // Got an error
-      debugger;
+     // debugger;
       console.error(error);
     } else {
       self.neighborhoods = neighborhoods;
@@ -211,7 +211,7 @@ const addMarkersToMap = (restaurants = self.restaurants) => {
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
 document.addEventListener('DOMContentLoaded', (event) => {
-  debugger;
+  //debugger;
   initMap(); // added
   fetchNeighborhoods();
   fetchCuisines();

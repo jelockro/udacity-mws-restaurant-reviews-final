@@ -1,7 +1,7 @@
-import 'babel-polyfill';
-import register from './register';
-import idb from 'idb';
-import dbhelper from './dbhelper';
+// import 'babel-polyfill';
+// import register from './register';
+// import idb from 'idb';
+// import dbhelper from './dbhelper';
 
 let restaurant;
 var newMap;
