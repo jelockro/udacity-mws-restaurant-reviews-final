@@ -1,8 +1,31 @@
-# mws-restaurant-stage2
+# mws-restaurant-stage3
 
-This the second out of 3 stage udacity mobile web development project.  In this stage the goal is to create a web-app that has offline capabilities and passes the following lighthouse scores:
+This the third out of 3 stage udacity mobile web development project.  
+In this stage the critera are as follows 
+
+## 1. Functionality
+
+### A. User Interface
+Users are able to mark a restaurant as a favorite, this toggle is visible in the application. A form is added to allow users to add their own reviews for a restaurant. Form submission works properly and adds a new review to the database.
+
+### B. Offline Use
+The client application works offline. JSON responses are cached using the IndexedDB API. Any data previously accessed while connected is reachable while offline. User is able to add a review to a restaurant while offline and the review is sent to the server when connectivity is re-established.
+
+## 2. Responsive Design and Accessibility
+
+### A. Responsive Design
+The application maintains a responsive design on mobile, tablet and desktop viewports. All new features are responsive, including the form to add a review and the control for marking a restaurant as a favorite.
+
+### B. Accessibility
+The application retains accessibility features from the previous projects. Images have alternate text, the application uses appropriate focus management for navigation, and semantic elements and ARIA attributes are used correctly. Roles are correctly defined for all elements of the review form.
+
+## 3. Performance
+
+### Site Performance
+Lighthouse targets for each category exceed:
+
 Progressive Web App: >90
-Performance: >70
+Performance: >90
 Accessibility: >90
 
 ## Getting Started
