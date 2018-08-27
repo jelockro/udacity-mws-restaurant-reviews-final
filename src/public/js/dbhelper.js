@@ -281,8 +281,13 @@ class DBHelper {
     console.log('after switcharoo: ', isFavorite);   // Toggling state so reversing the value
     try {
         const fetchURL = DBHelper.DATABASE_URL;
-        restaurant = await fetch(`${fetchURL}/${id}`, { method: 'PUT', body: `is_favorite=${ isFavorite }`});
+        restaurant = await fetch(`${fetchURL}/${id}/?is_favorite=${isFavorite}`, { 
+          method: 'PUT',
+          //body: `is_favorite=${ isFavorite }`
+        });
         console.log('what might the state of restaurant be?', restaurant)
+        let check_status = await fetch(`${fetchURL}/${id}/?is_favorite=${isFavorite}`).then(response => response.json());
+        console.log('check_status:', check_status);
         if (!restaurant) {
           console.log('! restaurant is proving false');
           return; // CORS Prefetch OPTIONS skip
@@ -299,7 +304,7 @@ class DBHelper {
         var restaurant = request;
         restaurant.is_favorite = isFavorite;
         var requestUpdate = tx.put(restaurant);
-
+        return;
         }).catch(e => console.log('damn,',e));
       // request.onsuccess =  event => {
       //   var restaurant = event.target.result;
@@ -307,6 +312,7 @@ class DBHelper {
       //   var requestUpdate = tx.put(restaurant)
       // }
   });
+
 
 
     // const dbService = await this.openDB();
@@ -331,6 +337,7 @@ class DBHelper {
     );
     return marker;
   } */
+  
  
   /**
    * Fetch all restaurants.
@@ -375,3 +382,4 @@ class DBHelper {
 // });
 
 }
+

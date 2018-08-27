@@ -136,9 +136,11 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   fillReviewsHTML();
 }
 
-var toggleFavorite = async (event) => {
+const toggleFavorite = async (event) => {
     event.preventDefault();
-    console.log('before dbToggle, state is ', self.restaurant.is_favorite);
+    console.log('before dbToggle, state of self.restaurant', self.restaurant);
+    console.log('before dbToggle, state of self.restaurant.is_favorite', self.restaurant.is_favorite);
+
     try {
         await DBHelper.toggleRestaurantFavorite(self.restaurant.id, self.restaurant.is_favorite);
         console.log('after awaiting the DB portion, the favorite should reverse', self.restaurant.is_favorite);
