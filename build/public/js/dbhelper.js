@@ -279,6 +279,7 @@ class DBHelper {
     let restaurant;
     isFavorite = (isFavorite === 'true' || isFavorite === true ? false : true); 
     console.log('after switcharoo: ', isFavorite);   // Toggling state so reversing the value
+    
     try {
         const fetchURL = DBHelper.DATABASE_URL;
         restaurant = await fetch(`${fetchURL}/${id}/?is_favorite=${isFavorite}`, { 
@@ -288,6 +289,7 @@ class DBHelper {
         console.log('what might the state of restaurant be?', restaurant)
         let check_status = await fetch(`${fetchURL}/${id}/?is_favorite=${isFavorite}`).then(response => response.json());
         console.log('check_status:', check_status);
+        
         if (!restaurant) {
           console.log('! restaurant is proving false');
           return; // CORS Prefetch OPTIONS skip
@@ -296,8 +298,10 @@ class DBHelper {
       console.log(error, "'PUT' request did not work.");
     }
     // so far the 'PUT' request is successful, we also need to update the database
-
-    this.openDB().then(db => {
+    
+    // this await statement is not 
+    let holdup;
+    holdup = await this.openDB().then(db => {
       const tx = db.transaction(storeName, 'readwrite').objectStore(storeName);
       tx.get(id).then(request => {
         console.log('your request is,', request);
@@ -306,6 +310,8 @@ class DBHelper {
         var requestUpdate = tx.put(restaurant);
         return;
         }).catch(e => console.log('damn,',e));
+
+    return;
       // request.onsuccess =  event => {
       //   var restaurant = event.target.result;
       //   restaurant.is_favorite = isFavorite;
