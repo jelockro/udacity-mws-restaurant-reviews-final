@@ -284,13 +284,15 @@ class DBHelper {
     //try to fetch from server and put the switched state to the server
     try {
         const fetchURL = DBHelper.DATABASE_URL;
+        let holdup;
+
         restaurant = await fetch(`${fetchURL}/${id}/?is_favorite=${isFavorite}`, { 
           method: 'PUT',
           //body: `is_favorite=${ isFavorite }`
         });
         console.log('what might the state of restaurant be?', restaurant)
         
-        let check_status = await fetch(`${fetchURL}/${id}/?is_favorite=${isFavorite}`).then(response => response.json());
+        const check_status = await fetch(`${fetchURL}/${id}/?is_favorite=${isFavorite}`).then(response => response.json());
         
         console.log('check_status:', check_status);
         
@@ -298,99 +300,68 @@ class DBHelper {
           console.log('! restaurant is proving false');
           return; // CORS Prefetch OPTIONS skip
         }
-    } catch (error) {
-      console.log(error, "'PUT' request did not work.");
-    }
-    // so far the 'PUT' request is successful, we also need to update the database
-    
     // put the new state to idb.  For some reason, this code block is not waiting
     // for this request to finish before escaping back to restaurant_info.js
-    let holdup;
-    holdup = await this.openDB().then(db => {
-      const tx = db.transaction(storeName, 'readwrite').objectStore(storeName);
-      tx.get(id).then(request => {
+
+        holdup = await this.openDB()
+          .then(db => {
+            const tx = db.transaction(storeName, 'readwrite').objectStore(storeName);
+            tx.get(id)
+              .then(request => {
+                console.log('your request is,', request);
+                let restaurant = request;
+                restaurant.is_favorite = isFavorite;
+                const requestUpdate = tx.put(restaurant);
+              })
+              .catch(e => console.log('damn,', e));
+          });
+    } catch (error) {
+            console.log(error, "'PUT' request did not work.");
+    }
+    return true;
+  }
+  //  creating a new method that is written in promise synt
+  static toggle(id, isFavorite) {
+    return new Promise ((resolve, reject) => {
+      let p1 = new Promise((resolve, reject) => {
+      //Switcharoo code, if the state is true, make it false, vice versa
+        let restaurant;
+        const fetchURL = DBHelper.DATABASE_URL;
+        isFavorite = (isFavorite === 'true' || isFavorite === true ? false : true); 
+        console.log('after switcharoo: ', isFavorite); 
         
-        console.log('your request is,', request);
         
-        var restaurant = request;
-        restaurant.is_favorite = isFavorite;
-        var requestUpdate = tx.put(restaurant);
-        })
-      .catch(e => console.log('damn,',e));
+        // a fetch promise, with catch statement
+        fetch(`${fetchURL}/${id}/?is_favorite=${isFavorite}`, { 
+            method: 'PUT'})
+          .then(response => {
+            let check_status = response.json();
+            resolve(check_status);
+          })
+          .catch(err => console.log('did not get a response from put request:', err));
+      });
+
+      p1.then(status => resolve(status))
+      .catch(err => console.log(err));
     });
-    return;
-      // request.onsuccess =  event => {
-      //   var restaurant = event.target.result;
-      //   restaurant.is_favorite = isFavorite;
-      //   var requestUpdate = tx.put(restaurant)
-      // }
-  };
-
-
-
-    // const dbService = await this.openDB();
-    // console.log('dbService:', dbService);
-    // const store = await this.getStore(storeName, 'readwrite', dbService);
-    // if (!restaurant) {
-    //     console.log('There\'s no restaurant!');
-    //     restaurant = await store.get(id);
-    //     //restaurant.synced = 0;
-    //     restaurant.is_favorite = isFavorite;
-    // }
-    // console.log('okay, your restaurant is ', restaurant, ' and check this out: ', restaurant.is_favorite);
-    // store.put(restaurant);
   }
-  /* static mapMarkerForRestaurant(restaurant, map) {
-    const marker = new google.maps.Marker({
-      position: restaurant.latlng,
-      title: restaurant.name,
-      url: DBHelper.urlForRestaurant(restaurant),
-      map: map,
-      animation: google.maps.Animation.DROP}
-    );
-    return marker;
-  } */
-  
- 
-  /**
-   * Fetch all restaurants.
-   */
- /**   
-  *  Old XHR *
-  static fetchRestaurants(callback) {
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', DBHelper.DATABASE_URL);
-    xhr.onload = () => {
-      if (xhr.status === 200) { // Got a success response from server!
-        const json = JSON.parse(xhr.responseText);
-        const restaurants = json.restaurants;
-        callback(null, restaurants);
-      } else { // Oops!. Got an error from server.
-        const error = (`Request failed. Returned status of ${xhr.status}`);
-        callback(error, null);
-      }
-    };
-    xhr.send();
-  }
-*/
 
-// //console.log(self.indexedDB);
-// // i think this code is only run once when the service worker is activated
-// // so I think that if I want service worker code to be run it needs to be done inside an eventlistener
+      // an idb promise with nested idb.transaction & respective catch statements
+      // this.openDB()
+      //   .then(db => {
+      //     const tx = db.transaction(storeName, 'readwrite').objectStore(storeName);
+      //     tx.get(id).then(request => {
+      //           console.log('your request is,', request);
+      //           let restaurant = request;
+      //           restaurant.is_favorite = isFavorite;
+      //           const requestUpdate = tx.put(restaurant);
+      //     })
+      //     .catch(err => console.log('unable to put into IDB,', err));
+      //   })
+      //   .catch(err => console.log('unable to open data store on db', err));
+      // resolve with a string saying Success
+      //resolve('Success');    
 
-
-// if (!self.indexedDB) {
-//   console.log('Your browser doesn\'t support a stable version of IndexedDB.');
-// } else console.log('I see indexedDB');
-
-
-
-// openDB();
-
-// opening database on activate sequence
-// self.addEventListener('activate', event => {
-//   event.waitUntil(
-//     db = openDB()
-//     );
-// });
+   
+}
 

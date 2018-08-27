@@ -136,20 +136,20 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   fillReviewsHTML();
 }
 
-const toggleFavorite = async (event) => {
+async function toggleFavorite(event) {
     event.preventDefault();
     console.log('before dbToggle, state of self.restaurant', self.restaurant);
     console.log('before dbToggle, state of self.restaurant.is_favorite', self.restaurant.is_favorite);
 
     try {
-        await DBHelper.toggleRestaurantFavorite(self.restaurant.id, self.restaurant.is_favorite);
-        console.log('after awaiting the DB portion, the favorite should reverse', self.restaurant.is_favorite);
-    } catch (error) {
-        console.log(error);
-    }
-    fillRestaurantHTML(self.restaurant);
-    console.log('after refilling what is the state', self.restaurant.is_favorite);
-    return false; 
+        DBHelper.toggle(self.restaurant.id, self.restaurant.is_favorite)
+          .then(success => {
+            console.log(success);
+            fillRestaurantHTML(self.restaurant);
+            console.log('after refilling what is the state', self.restaurant.is_favorite);
+          })
+          .catch(error => console.log('DB.toggle did not work'));
+    } catch (err) {console.log('nothing worked', err)};
 }
 /**
  * Create restaurant operating hours HTML table and add it to the webpage.
