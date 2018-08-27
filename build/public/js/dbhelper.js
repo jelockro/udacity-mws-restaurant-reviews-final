@@ -275,11 +275,13 @@ class DBHelper {
         console.log('in the database, here is the state before switcharoo,', request);
       }).catch(e => console.log('damn,',e));
     });
-
+    
+    //Switcharoo code, if the state is true, make it false, vice versa
     let restaurant;
     isFavorite = (isFavorite === 'true' || isFavorite === true ? false : true); 
     console.log('after switcharoo: ', isFavorite);   // Toggling state so reversing the value
     
+    //try to fetch from server and put the switched state to the server
     try {
         const fetchURL = DBHelper.DATABASE_URL;
         restaurant = await fetch(`${fetchURL}/${id}/?is_favorite=${isFavorite}`, { 
@@ -301,7 +303,8 @@ class DBHelper {
     }
     // so far the 'PUT' request is successful, we also need to update the database
     
-    // this await statement is not 
+    // put the new state to idb.  For some reason, this code block is not waiting
+    // for this request to finish before escaping back to restaurant_info.js
     let holdup;
     holdup = await this.openDB().then(db => {
       const tx = db.transaction(storeName, 'readwrite').objectStore(storeName);
