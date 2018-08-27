@@ -11,8 +11,11 @@ var newMap;
  */
 document.addEventListener('DOMContentLoaded', (event) => {
   initMap();
+  const favoriteHitbox = this.document.getElementById('favorite-hitbox');
+  favoriteHitbox.addEventListener('click', (event) => {
+    toggleFavorite(event);
+  })
 });
-
 /**
  * Initialize leaflet map
  */
@@ -87,7 +90,28 @@ fetchRestaurantFromURL = (callback) => {
 fillRestaurantHTML = (restaurant = self.restaurant) => {
   const name = document.getElementById('restaurant-name');
   name.innerHTML = restaurant.name;
+    
+  // Toggle Heart-SVG for Favorite
+  // const favorite_svg = document.getElementsByClassName('favorite-heart');
+  const favoriteAnchor = document.getElementById('restaurant-favorite-anchor');
+  let favoriteAnchorMessage;
+ 
+  const favoriteFilled = document.getElementById('favorite-filled'); 
+  const favoriteEmpty= document.getElementById('favorite-empty'); 
+ 
+  if (restaurant.is_favorite === 'true' || restaurant.is_favorite === true) {
+      favoriteFilled.setAttribute('style', 'display: inherit;');
+      favoriteEmpty.setAttribute('style', 'display: none;');
+      favoriteAnchorMessage = `Remove '${restaurant.name}' from your Faves`;
 
+  } else {
+      favoriteFilled.setAttribute('style', 'display: none;');
+      favoriteEmpty.setAttribute('style', 'display: inherit;');
+      favoriteAnchorMessage = `Make '${restaurant.name}' one of your Faves`;
+  }
+  favoriteAnchor.setAttribute('aria-label', favoriteAnchorMessage); 
+  favoriteAnchor.innerHTML = favoriteAnchorMessage;
+  
   const address = document.getElementById('restaurant-address');
   address.innerHTML = restaurant.address;
 
@@ -112,6 +136,19 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   fillReviewsHTML();
 }
 
+var toggleFavorite = async (event) => {
+    event.preventDefault();
+    console.log('before dbToggle, state is ', self.restaurant.is_favorite);
+    try {
+        await DBHelper.toggleRestaurantFavorite(self.restaurant.id, self.restaurant.is_favorite);
+        console.log('after awaiting the DB portion, the favorite should reverse', self.restaurant.is_favorite);
+    } catch (error) {
+        console.log(error);
+    }
+    fillRestaurantHTML(self.restaurant);
+    console.log('after refilling what is the state', self.restaurant.is_favorite);
+    return false; 
+}
 /**
  * Create restaurant operating hours HTML table and add it to the webpage.
  */

@@ -21,6 +21,11 @@ class DBHelper {
       store.createIndex('name', 'name', { unique: false }); 
       });
   }
+  
+  static getStore(storeName, mode, dbService) {
+    return dbService.transaction(storeName, mode).objectStore(storeName);
+  };
+
 
   static fetchRestaurants(callback) {
     //let restaurantsJson;
@@ -52,13 +57,10 @@ class DBHelper {
         //console.log('[openDB().then(db)] :', db); 
         
         if (db) {
-          //console.log('[inside the if(db) of Promise]');
-          //console.log('StoreName:', storeName);
           var transaction = db.transaction(storeName, 'readwrite');
-          //console.log('[inside the if(db) of Promise] transaction:', transaction);
+
           var restaurantStore = transaction.objectStore(storeName); //open the objet store
-          //console.log('[inside the if(db) of Promise] restaurantStore:', restaurantStore);
-          //console.log('[opendb.then]: restaurantStore:', restaurantStore.getAll());
+
           return restaurantStore.getAll();
         }
         else {
@@ -263,6 +265,61 @@ class DBHelper {
       })
       marker.addTo(newMap);
     return marker;
+  }
+
+  static async toggleRestaurantFavorite(id, isFavorite) {
+    // I want to see what the state is in the database at this point
+    this.openDB().then(db => {
+      const tx = db.transaction(storeName, 'readwrite').objectStore(storeName);
+      tx.get(id).then(request => {
+        console.log('in the database, here is the state before switcharoo,', request);
+      }).catch(e => console.log('damn,',e));
+    });
+
+    let restaurant;
+    isFavorite = (isFavorite === 'true' || isFavorite === true ? false : true); 
+    console.log('after switcharoo: ', isFavorite);   // Toggling state so reversing the value
+    try {
+        const fetchURL = DBHelper.DATABASE_URL;
+        restaurant = await fetch(`${fetchURL}/${id}`, { method: 'PUT', body: `is_favorite=${ isFavorite }`});
+        console.log('what might the state of restaurant be?', restaurant)
+        if (!restaurant) {
+          console.log('! restaurant is proving false');
+          return; // CORS Prefetch OPTIONS skip
+        }
+    } catch (error) {
+      console.log(error, "'PUT' request did not work.");
+    }
+    // so far the 'PUT' request is successful, we also need to update the database
+
+    this.openDB().then(db => {
+      const tx = db.transaction(storeName, 'readwrite').objectStore(storeName);
+      tx.get(id).then(request => {
+        console.log('your request is,', request);
+        var restaurant = request;
+        restaurant.is_favorite = isFavorite;
+        var requestUpdate = tx.put(restaurant);
+
+        }).catch(e => console.log('damn,',e));
+      // request.onsuccess =  event => {
+      //   var restaurant = event.target.result;
+      //   restaurant.is_favorite = isFavorite;
+      //   var requestUpdate = tx.put(restaurant)
+      // }
+  });
+
+
+    // const dbService = await this.openDB();
+    // console.log('dbService:', dbService);
+    // const store = await this.getStore(storeName, 'readwrite', dbService);
+    // if (!restaurant) {
+    //     console.log('There\'s no restaurant!');
+    //     restaurant = await store.get(id);
+    //     //restaurant.synced = 0;
+    //     restaurant.is_favorite = isFavorite;
+    // }
+    // console.log('okay, your restaurant is ', restaurant, ' and check this out: ', restaurant.is_favorite);
+    // store.put(restaurant);
   }
   /* static mapMarkerForRestaurant(restaurant, map) {
     const marker = new google.maps.Marker({

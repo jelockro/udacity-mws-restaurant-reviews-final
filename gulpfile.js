@@ -102,6 +102,7 @@ const copy_static = () => {
         `${dirs.src}/public/img/**/*.jpg`,
         `${dirs.src}/public/img/**/*.ico`,
         `${dirs.src}/public/img/**/*.png`,
+        `${dirs.src}/public/img/**/*.svg`,
         `${dirs.src}/server.js`,
         `${dirs.src}/public/js/main.js`,
         `${dirs.src}/public/js/register.js`,
