@@ -287,7 +287,9 @@ class DBHelper {
           //body: `is_favorite=${ isFavorite }`
         });
         console.log('what might the state of restaurant be?', restaurant)
+        
         let check_status = await fetch(`${fetchURL}/${id}/?is_favorite=${isFavorite}`).then(response => response.json());
+        
         console.log('check_status:', check_status);
         
         if (!restaurant) {
@@ -304,20 +306,22 @@ class DBHelper {
     holdup = await this.openDB().then(db => {
       const tx = db.transaction(storeName, 'readwrite').objectStore(storeName);
       tx.get(id).then(request => {
+        
         console.log('your request is,', request);
+        
         var restaurant = request;
         restaurant.is_favorite = isFavorite;
         var requestUpdate = tx.put(restaurant);
-        return;
-        }).catch(e => console.log('damn,',e));
-
+        })
+      .catch(e => console.log('damn,',e));
+    });
     return;
       // request.onsuccess =  event => {
       //   var restaurant = event.target.result;
       //   restaurant.is_favorite = isFavorite;
       //   var requestUpdate = tx.put(restaurant)
       // }
-  });
+  };
 
 
 
@@ -386,6 +390,4 @@ class DBHelper {
 //     db = openDB()
 //     );
 // });
-
-}
 
