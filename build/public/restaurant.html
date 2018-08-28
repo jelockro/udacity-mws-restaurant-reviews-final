@@ -62,9 +62,45 @@
     </section>
     <!-- end restaurant -->
     <!-- Beginning reviews -->
-    <section id="reviews-container">
+    <section id="reviews-container" aria-label="customer reviews">
       <ul id="reviews-list"></ul>
     </section>
+    <section id="reviews-form-container" tabindex="0" aria-label="add new review">
+                <h2>Add a Review</h2>
+                <form id="reviews-form">
+                    <div id="review-errors" role="alert" aria-atomic="true" style="width: 100%">
+                    </div>
+                    <div class="review-fullwidth">
+                        <label for="name">Your Name
+                            <span class="review-required">(required)</span>:</label>
+                        <br>
+                        <input name="name" type="text" id="name" autocomplete="name" aria-required="true">
+                    </div>
+                    <div class="review-fullwidth">
+                        <label for="rating">Rating
+                            <span class="review-required">(required)</span>:</label>
+                        <br>
+                        <select name="rating" id="rating" aria-required="true" autocomplete="nope">
+                            <option value="" selected disabled hidden>Choose Rating</option>
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                        </select>
+                    </div>
+                    <div class="review-fullwidth">
+                        <label for="comments">Comments
+                            <span class="review-required">(required)</span>:</label>
+                        <br>
+                        <textarea id="comments" name="comments" rows="10" column="100" aria-required="true"></textarea>
+                    </div>
+                    <div class="review-fullwidth" style="display: flex; justify-content: space-around">
+                        <button type="submit" value="Submit" id="review-submit">Send Comment</button>
+                        <button type="reset" value="Reset" id="review-reset">Reset</button>
+                    </div>
+                </form>
+            </section>
     <!-- End reviews -->
   </main>
   <!-- End main -->
