@@ -144,9 +144,16 @@ async function toggleFavorite(event) {
     try {
         DBHelper.toggle(self.restaurant.id, self.restaurant.is_favorite)
           .then(success => {
-            console.log(success);
-            fillRestaurantHTML(self.restaurant);
-            console.log('after refilling what is the state', self.restaurant.is_favorite);
+            console.log('Great Job', success);
+            console.log(self.restaurant.id);
+            fetchRestaurantFromURL(error,restaurant => {
+              if (error) {
+                console.log('restaurant', restaurant);
+              }
+              else console.log('error');
+            });
+            console.log('after refilling what is the state: ', self.restaurant.is_favorite
+            , ' \n self.restaurant is: ', self.restaurant);
           })
           .catch(error => console.log('DB.toggle did not work'));
     } catch (err) {console.log('nothing worked', err)};

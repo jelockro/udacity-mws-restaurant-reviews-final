@@ -320,9 +320,11 @@ class DBHelper {
     }
     return true;
   }
+  
   //  creating a new method that is written in promise synt
   static toggle(id, isFavorite) {
     return new Promise ((resolve, reject) => {
+      
       let p1 = new Promise((resolve, reject) => {
       //Switcharoo code, if the state is true, make it false, vice versa
         let restaurant;
@@ -335,18 +337,40 @@ class DBHelper {
         fetch(`${fetchURL}/${id}/?is_favorite=${isFavorite}`, { 
             method: 'PUT'})
           .then(response => {
-            let check_status = response.json();
-            resolve(check_status);
+            let jsonevent = response.json();
+            console.log('check_status: ', jsonevent);
+             // this resolves the p1 promise so it can be thenned below
+             // this should be restaurant json
+            resolve(jsonevent);
           })
           .catch(err => console.log('did not get a response from put request:', err));
       });
 
-      p1.then(status => resolve(status))
-      .catch(err => console.log(err));
-    });
-  }
+      p1.then(async restaurantjson=> {
 
-      // an idb promise with nested idb.transaction & respective catch statements
+        console.log('[restaurantsjson.then]', restaurantjson, 
+        '/n [restaurantjson.is_favorite]:', restaurantjson.is_favorite);
+
+        const db = await DBHelper.openDB();
+        console.log('storeName:', storeName);
+        const tx = await db.transaction(storeName, 'readwrite').objectStore(storeName);
+        tx.get(id)
+          .then(async request => {
+            console.log('pulled this record from idb,', request);
+            console.log('I will update this record with,', restaurantjson);
+            //let restaurant = request;
+            //restaurant.is_favorite = isFavorite;
+            console.log('restaurant.is_favorite into idb,', restaurantjson.is_favorite);
+            const requestUpdate = await tx.put(restaurantjson);
+            resolve(requestUpdate);
+          })
+          .catch(e => console.log('damn,', e));
+      });
+      //console.log('[async restaurants]:restaurantsjson', restaurantsjson);
+      //resolve(restaurantsjson);
+    });  
+  }
+        // an idb promise with nested idb.transaction & respective catch statements
       // this.openDB()
       //   .then(db => {
       //     const tx = db.transaction(storeName, 'readwrite').objectStore(storeName);
