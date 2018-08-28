@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
   const favoriteHitbox = this.document.getElementById('favorite-hitbox');
   favoriteHitbox.addEventListener('click', (event) => {
     toggleFavorite(event);
+
   })
 });
 /**
@@ -146,12 +147,13 @@ async function toggleFavorite(event) {
           .then(success => {
             console.log('Great Job', success);
             console.log(self.restaurant.id);
-            fetchRestaurantFromURL(error,restaurant => {
-              if (error) {
-                console.log('restaurant', restaurant);
-              }
-              else console.log('error');
-            });
+            //self.location.reload();
+            // fetchRestaurantFromURL((error, success) => {
+            //   if (error) { console.log(error) } 
+            //   else {console.log('fetchRestaurantFromUrl:', success)}
+            // });
+            self.restaurant = success;
+            fillRestaurantHTML(success);
             console.log('after refilling what is the state: ', self.restaurant.is_favorite
             , ' \n self.restaurant is: ', self.restaurant);
           })

@@ -362,7 +362,9 @@ class DBHelper {
             //restaurant.is_favorite = isFavorite;
             console.log('restaurant.is_favorite into idb,', restaurantjson.is_favorite);
             const requestUpdate = await tx.put(restaurantjson);
-            resolve(requestUpdate);
+            const newObject = await tx.get(id);
+            console.log('newObject', newObject);
+            resolve(newObject); //resolves the top-level promise
           })
           .catch(e => console.log('damn,', e));
       });
