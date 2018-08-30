@@ -44,6 +44,22 @@ initMap = () => {
   });
 }
 
+/* window.initMap = () => {
+  fetchRestaurantFromURL((error, restaurant) => {
+    if (error) { // Got an error!
+      console.error(error);
+    } else {
+      self.map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 16,
+        center: restaurant.latlng,
+        scrollwheel: false
+      });
+      fillBreadcrumb();
+      DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
+    }
+  });
+} */
+
 /**
  * Get current restaurant from page URL.
  */
@@ -83,7 +99,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
  
   const favoriteFilled = document.getElementById('favorite-filled'); 
   const favoriteEmpty= document.getElementById('favorite-empty'); 
-   
+ 
   if (restaurant.is_favorite === 'true' || restaurant.is_favorite === true) {
       favoriteFilled.setAttribute('style', 'display: inherit;');
       favoriteEmpty.setAttribute('style', 'display: none;');
@@ -137,7 +153,22 @@ async function toggleFavorite(event) {
             //   else {console.log('fetchRestaurantFromUrl:', success)}
             // });
             self.restaurant = success;
-            fillRestaurantHTML(success);
+            //fillRestaurantHTML(success);
+            const favoriteAnchor = document.getElementById('restaurant-favorite-anchor');
+            let favoriteAnchorMessage;
+ 
+            const favoriteFilled = document.getElementById('favorite-filled'); 
+            const favoriteEmpty= document.getElementById('favorite-empty'); 
+            if (success.is_favorite === 'true' || success.is_favorite === true) {
+              favoriteFilled.setAttribute('style', 'display: inherit;');
+              favoriteEmpty.setAttribute('style', 'display: none;');
+              favoriteAnchorMessage = `Remove '${success.name}' from your Faves`;
+
+            } else {
+                favoriteFilled.setAttribute('style', 'display: none;');
+                favoriteEmpty.setAttribute('style', 'display: inherit;');
+                favoriteAnchorMessage = `Make '${success.name}' one of your Faves`;
+            }
             console.log('after refilling what is the state: ', self.restaurant.is_favorite
             , ' \n self.restaurant is: ', self.restaurant);
           })

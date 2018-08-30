@@ -51,14 +51,14 @@ var server = Object.create(Server);
 const  RESTAURANTS_URL =[server.PORT, 'restaurants'];
 const  RESTAURANT_BY_ID = [server.PORT, 'restaurants', server.id];
 const  REVIEWS_URL= [server.PORT, 'reviews'];
-const  REVIEW_BY_ID= [server.PORT, 'reviews', server.id];
+const  REVIEWS_BY_ID= [server.PORT, 'reviews', server.id];
 
 
 function findById(jsonArray, id, callback) {
   const result = jsonArray.find(r => r.id === parseInt(id, 10));
   //debugger;
   if (result) return(null, result);
-  else return('Restaurant does not exist', null);
+  else return('data does not exist', null);
 }
 
 class DBHelper {
@@ -76,7 +76,7 @@ class DBHelper {
       });
   }
   
-  //static dbService = DBHelper.openDB();
+
 
   // a static method that will get open the store connection and return it.  Is possibly promise.  
   static getStore(storeName, mode, dbService) {
@@ -131,13 +131,13 @@ class DBHelper {
   static async fetchRestaurants(callback) {
     if (!window.indexedDB) callback(null, server.requestData(RESTAURANTS_URL));
     debugger;
-    let restaurantArray = []
+    let restaurantArray = [];
     let db = await DBHelper.openDB();
     debugger;
     restaurantArray = await DBHelper.gettingAll(RESTAURANT_STORE);
     console.log('[restaurantArray] ,', restaurantArray);
     debugger;
-    if (restaurantArray.length === 0){
+    if (restaurantArray.length === 0) {
       debugger;
       DBHelper.serverToIDB(RESTAURANTS_URL, RESTAURANT_STORE, db)
         .then(result => {
@@ -145,7 +145,7 @@ class DBHelper {
           console.log(result);
           DBHelper.datafromIDB(RESTAURANT_STORE, db).then(data => callback(null, data));
         });
-      }
+    }
     else DBHelper.dataFromIDB(RESTAURANT_STORE, db).then(data => callback(null, data));
 
   }
@@ -159,9 +159,7 @@ class DBHelper {
     }
     else DBHelper.fetchRestaurants((error, restaurants) => {
       callback(null, findById(restaurants, id));
-
-    });
-    
+    });   
   }
 
   /**
@@ -343,10 +341,36 @@ class DBHelper {
     });  
   }
 
-  // static getCachedReviews(id) {
-  //   const db = await DBHelper.openDB();
-  //   const store = 
-  // }
-   
+  static async fetchReviews(callback) {
+    if (!window.indexedDB) callback(null, server.requestData(REVIEWS_URL));
+    debugger;
+    let reviewsArray = [];
+    let db = await DBHelper.openDB();
+    debugger;
+    reviewsArray = await DBHelper.gettingAll(REVIEWS_STORE);
+    console.log('[reviewsArray] ,', reviewsArray);
+    debugger;
+    if (reviewsArray.length === 0) {
+      debugger;
+      DBHelper.serverToIDB(REVIEWS_URL, REVIEWS_STORE, db)
+        .then(result => {
+          debugger;
+          console.log(result);
+          DBHelper.datafromIDB(REVIEWS_STORE, db).then(data => callback(null, data));
+        });
+    }
+    else DBHelper.dataFromIDB(REVIEWS_STORE, db).then(data => callback(null, data));
+
+  }
+
+  static fetchReviewsById(id, callback) {
+    if (!window.indexedDB) {
+      server.id = id;
+      callback(null, server.requestData(REVIEWS_BY_ID));
+    }
+    else DBHelper.fetchReviews((error, reviews) => {
+      callback(null, findById(reviews, id));
+    });   
+  }
 }
 
