@@ -1,149 +1,151 @@
 //const idb = require('idb');
 const dbName = 'mws_DB';
 const version = 3; 
-const storeName = 'restaurants';
+const RESTAURANT_STORE = 'restaurants'; //for store name
+const REVIEWS_STORE ='reviews'; // for store name
+//const port = '1337';
+function GET_URL(port, filepath, id) { 
+    if (!id) { 
+      console.trace('!id port, fileapth, id,', port, filepath, id)
+      return `http://localhost:${port}/${filepath}`;
+    }
+    else {
+      console.log('port, fileapth, id,', port, filepath, id);
+      return `http://localhost:${port}/${filepath}/${id}`;
+    } 
+}
+/**
+ * server object
+ * 
+ */
+var Server = {
+  // NETWORK SERVICES, make a constant for Network Service urls
+  
+
+  PORT: '1337', // Change this to your server port
+  id: null,
+
+
+  /** a static method that gets data from the server url. This will be called in !window.navigator or when online
+  * @param {*} network service objects, id of data object requested
+  * written as a promise.
+  */
+  requestData : (networkService) => {
+    return new Promise((resolve, reject) =>{
+      console.log('[requestdata]:networkService:', networkService);
+
+      fetch(GET_URL(networkService[0], networkService[1]))
+        .then(response => response.json())
+          .then(jsonData => {
+            console.log('[fetcjdata]:jsonData:',jsonData);
+            resolve(null, jsonData);
+          })
+           .catch(e => reject(`Request failed. Returned ${e}`, null));
+    });
+  },
+
+
+}
+debugger;
+var server = Object.create(Server);
+const  RESTAURANTS_URL =[server.PORT, 'restaurants'];
+const  RESTAURANT_BY_ID = [server.PORT, 'restaurants', server.id];
+const  REVIEWS_URL= [server.PORT, 'reviews'];
+const  REVIEW_BY_ID= [server.PORT, 'reviews', server.id];
+
+
+function findById(jsonArray, id, callback) {
+  const result = jsonArray.find(r => r.id === parseInt(id, 10));
+  //debugger;
+  if (result) return(null, result);
+  else return('Restaurant does not exist', null);
+}
+
 class DBHelper {
 
-  /**
-   * Database URL.
-   * Change this to restaurants.json file location on your server.
-   */
-  static get DATABASE_URL() {
-    const port = 1337; // Change this to your server port
-    return `http://localhost:${port}/restaurants`;
-  }
-   
-  //  I'm creating a static function to open the indexedDB database
+
+  //  static function to open the indexedDB database
   static openDB() {
     return idb.open(dbName, version, upgradeDB => {
       //debugger;
-      const store = upgradeDB.createObjectStore('restaurants', { keyPath: 'id' }); 
-      store.createIndex('name', 'name', { unique: false }); 
+      const restaurantStore = upgradeDB.createObjectStore(RESTAURANT_STORE, { keyPath: 'id' }); 
+      restaurantStore.createIndex('name', 'name', { unique: false }); 
+
+      const reviewStore = upgradeDB.createObjectStore(REVIEWS_STORE, { keyPath: 'id' }); 
+      reviewStore.createIndex('name', 'name', { unique: false }); 
       });
   }
   
+  //static dbService = DBHelper.openDB();
+
+  // a static method that will get open the store connection and return it.  Is possibly promise.  
   static getStore(storeName, mode, dbService) {
     return dbService.transaction(storeName, mode).objectStore(storeName);
   };
-
-
-  static fetchRestaurants(callback) {
-    //let restaurantsJson;
-    //let restaurants;
-    //debugger;
-    const fetchURL = DBHelper.DATABASE_URL;
-    
-    if (!window.indexedDB) {
-      console.log("Your browser doesn't support a stable version of IndexedDB.");
-      fetch(fetchURL).then(response => response.json())
-        .then(restaurants => {
-        //console.log("restaurants JSON: ", restaurants);
-        callback(null, restaurants);
-        //debugger;
-      }).catch(e => {
-          callback(`Request failed. Returned ${e}`, null);
-      });
-    } 
-    
-    // **** PROMISE Section ************************************
-    // now we will begin opening a database and preparing for either
-    // populating it, or fetching from it.
-    // ***************************************
+ 
+  // a static method that opens db, get's store 
+  // and puts data from network service paramaters into db
+  // @param {*} networkService
+  static serverToIDB(networkService, storeName, dbService) { 
+    return new Promise(async(resolve, reject) => {
+      let store = await DBHelper.getStore(storeName, 'readwrite', dbService);
+      debugger;
+      serverData = await server.requestData(networkService)
+        .then(response => response.json());
+      serverData.forEach(resource => dbtransaction.put(resource)
+        .then(console.log(`${resource} put into database`)));
+      resolve('Resources were successfully put in IDB'); 
+        })  
+        .catch(e => console.log('it didn\'t work ', e));
+      
+       
+  }  // this ends the async restaurants functional code which returned restaurants 
   
-    const helper = new Promise((resolve, reject) => DBHelper.openDB() //<- the function is a chain
-      
-      .then(db => { //we are going to open a transaction and an object store
-      // if there is already a database we will .getall 
-        //console.log('[openDB().then(db)] :', db); 
-        
-        if (db) {
-          var transaction = db.transaction(storeName, 'readwrite');
-
-          var restaurantStore = transaction.objectStore(storeName); //open the objet store
-
-          return restaurantStore.getAll();
-        }
-        else {
-        //  otherwise we will return an empty list to be populated
-        //console.log('after if (db): does this part of code get touched?');
-        return [];
-       //console.log('[storeConnection:transaction.objectStore:] :', restaurantStore);
-       // db is closed at this point. ******
-        }
-      })
-      
-      .then(async restaurants => { // 
-        // at first go around we receive an empty list
-        // 
-          //debugger;
-          //console.log('is this an array of restaurants? ->', restaurants);
-          if (!restaurants || restaurants.length === 0) {
-            // start populating the list with our async/await fetch code 
-            //console.log('are we here yet');
-            await fetch(fetchURL)
-              .then(response => response.json())
-                .then(async restaurantsjson => {
-                  //console.log('[restaurantsjson.then]', restaurantsjson);
-                  
-                  const db = await DBHelper.openDB();
-                  //console.log('storeName:', storeName);
-                  const transaction = await db.transaction(storeName, 'readwrite');
-                  restaurantsjson.forEach(restaurant => {
-                      //console.log('[restaurant] :', restaurant);
-                      transaction.objectStore(storeName)
-                      .put(restaurant);
-                      //console.log('[after put]: Success!');
-                    }
-                  );
-                  //console.log('[async restaurants]:restaurantsjson', restaurantsjson);
-                  resolve(restaurantsjson);
-                });            
-          }
-          else resolve(restaurants);          
-          //resolve(restaurants);        
-      }));  // this ends the async restaurants functional code which returned restaurants 
-        
-   helper.then(restaurants => {
-          //console.log('[resolve statement]: restaurants', restaurants);
-          callback(null, restaurants);      
-        }, error => {
-          //console.log('[for reals, theres errs?]: error:', error);
-        });    
-    // **** End Promise Section *****
-    // **************************************
+  /**
+  *This should return an object, individual restaurant or review, or all restaurants and reviews.
+  *
+  */
+  static dataFromIDB(storeName, dbService, id) {
+    return new Promise((resolve,reject) => {
+      if (!id) resolve(DBHelper.getStore(storeName, 'readwrite', dbService).getAll());
+      else resolve(getStore(storeName, 'readwrite', dbService).index(id));
+    });
   }
+  
+  static async fetchRestaurants(callback) {
+    if (!window.indexedDB) callback(null, server.requestData(RESTAURANTS_URL));
+    debugger;
+    let restaurantArray = []
+    let db = await DBHelper.openDB();
+    debugger;
+    restaurantArray = await DBHelper.getStore(RESTAURANT_STORE, 'readwrite', db).getAll();
+    console.log('[restaurantArray] ,', restaurantArray);
+    debugger;
+    if (restaurantArray.length === 0){
+      debugger;
+      DBHelper.serverToIDB(RESTAURANTS_URL, RESTAURANT_STORE, db)
+        .then(result => {
+          debugger;
+          console.log(result);
+          DBHelper.datafromIDB(RESTAURANT_STORE, db).then(data => callback(null, data));
+        });
+      }
+    else DBHelper.dataFromIDB(RESTAURANT_STORE, db).then(data => callback(null, data));
 
-
+  }
   /**
    * Fetch a restaurant by its ID.
    */
   static fetchRestaurantById(id, callback) {
-    // fetch all restaurants with proper error handling.
-    //debugger;
-    DBHelper.fetchRestaurants((error, restaurants) => {
-      //debugger;
-      if (error) {
-        //debugger;
-        callback(error, null);
-      } else {
-        // console.log('[fecthbyid]:id:', id);
-        // let idtype = typeof(id);
-        // console.log('[fetchbyid]:argumentidtype:', idtype);
-        // console.log('[fetchbyid]:restaurants:', restaurants);
-        // restaurants.forEach(r => {
-        //   console.log('ids', r.id);
-        //   let idtype = typeof(id);
-        //   console.log('[fetchbyid]:indb:idtype:', idtype);
-        // });
-        const restaurant = restaurants.find(r => r.id === parseInt(id, 10));
-        //debugger;
-        if (restaurant) { // Got the restaurant
-          callback(null, restaurant);
-        } else { // Restaurant does not exist in the database
-          callback('Restaurant does not exist', null);
-        }
-      }
+    if (!window.indexedDB) {
+      server.id = id;
+      callback(null, server.requestData(RESTAURANT_BY_ID));
+    }
+    else DBHelper.fetchRestaurants((error, restaurants) => {
+      callback(null, findById(restaurants, id));
+
     });
+    
   }
 
   /**
@@ -185,7 +187,7 @@ class DBHelper {
    */
   static fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, callback) {
     // Fetch all restaurants
-    //debugger;
+    debugger;
     DBHelper.fetchRestaurants((error, restaurants) => {
       if (error) {
         callback(error, null);
@@ -267,59 +269,59 @@ class DBHelper {
     return marker;
   }
 
-  static async toggleRestaurantFavorite(id, isFavorite) {
-    // I want to see what the state is in the database at this point
-    this.openDB().then(db => {
-      const tx = db.transaction(storeName, 'readwrite').objectStore(storeName);
-      tx.get(id).then(request => {
-        console.log('in the database, here is the state before switcharoo,', request);
-      }).catch(e => console.log('damn,',e));
-    });
+  // static async toggleRestaurantFavorite(id, isFavorite) {
+  //   // I want to see what the state is in the database at this point
+  //   this.openDB().then(db => {
+  //     const tx = db.transaction(storeName, 'readwrite').objectStore(storeName);
+  //     tx.get(id).then(request => {
+  //       console.log('in the database, here is the state before switcharoo,', request);
+  //     }).catch(e => console.log('damn,',e));
+  //   });
     
-    //Switcharoo code, if the state is true, make it false, vice versa
-    let restaurant;
-    isFavorite = (isFavorite === 'true' || isFavorite === true ? false : true); 
-    console.log('after switcharoo: ', isFavorite);   // Toggling state so reversing the value
+  //   //Switcharoo code, if the state is true, make it false, vice versa
+  //   let restaurant;
+  //   isFavorite = (isFavorite === 'true' || isFavorite === true ? false : true); 
+  //   console.log('after switcharoo: ', isFavorite);   // Toggling state so reversing the value
     
-    //try to fetch from server and put the switched state to the server
-    try {
-        const fetchURL = DBHelper.DATABASE_URL;
-        let holdup;
+  //   //try to fetch from server and put the switched state to the server
+  //   try {
+  //       const fetchURL = server.RESTAURANTS_URL;
+  //       let holdup;
 
-        restaurant = await fetch(`${fetchURL}/${id}/?is_favorite=${isFavorite}`, { 
-          method: 'PUT',
-          //body: `is_favorite=${ isFavorite }`
-        });
-        console.log('what might the state of restaurant be?', restaurant)
+  //       restaurant = await fetch(`${fetchURL}/${id}/?is_favorite=${isFavorite}`, { 
+  //         method: 'PUT',
+  //         //body: `is_favorite=${ isFavorite }`
+  //       });
+  //       console.log('what might the state of restaurant be?', restaurant)
         
-        const check_status = await fetch(`${fetchURL}/${id}/?is_favorite=${isFavorite}`).then(response => response.json());
+  //       const check_status = await fetch(`${fetchURL}/${id}/?is_favorite=${isFavorite}`).then(response => response.json());
         
-        console.log('check_status:', check_status);
+  //       console.log('check_status:', check_status);
         
-        if (!restaurant) {
-          console.log('! restaurant is proving false');
-          return; // CORS Prefetch OPTIONS skip
-        }
-    // put the new state to idb.  For some reason, this code block is not waiting
-    // for this request to finish before escaping back to restaurant_info.js
+  //       if (!restaurant) {
+  //         console.log('! restaurant is proving false');
+  //         return; // CORS Prefetch OPTIONS skip
+  //       }
+  //   // put the new state to idb.  For some reason, this code block is not waiting
+  //   // for this request to finish before escaping back to restaurant_info.js
 
-        holdup = await this.openDB()
-          .then(db => {
-            const tx = db.transaction(storeName, 'readwrite').objectStore(storeName);
-            tx.get(id)
-              .then(request => {
-                console.log('your request is,', request);
-                let restaurant = request;
-                restaurant.is_favorite = isFavorite;
-                const requestUpdate = tx.put(restaurant);
-              })
-              .catch(e => console.log('damn,', e));
-          });
-    } catch (error) {
-            console.log(error, "'PUT' request did not work.");
-    }
-    return true;
-  }
+  //       holdup = await this.openDB()
+  //         .then(db => {
+  //           const tx = db.transaction(storeName, 'readwrite').objectStore(storeName);
+  //           tx.get(id)
+  //             .then(request => {
+  //               console.log('your request is,', request);
+  //               let restaurant = request;
+  //               restaurant.is_favorite = isFavorite;
+  //               const requestUpdate = tx.put(restaurant);
+  //             })
+  //             .catch(e => console.log('damn,', e));
+  //         });
+  //   } catch (error) {
+  //           console.log(error, "'PUT' request did not work.");
+  //   }
+  //   return true;
+  // }
   
   //  creating a new method that is written in promise synt
   static toggle(id, isFavorite) {
@@ -328,16 +330,22 @@ class DBHelper {
       let p1 = new Promise((resolve, reject) => {
       //Switcharoo code, if the state is true, make it false, vice versa
         let restaurant;
-        const fetchURL = DBHelper.DATABASE_URL;
+        console.log('server.RESTAURANTS_URL', server.RESTAURANTS_URL);
+        const fetchURL = GET_URL(server.RESTAURANTS_URL);
         isFavorite = (isFavorite === 'true' || isFavorite === true ? false : true); 
         console.log('after switcharoo: ', isFavorite); 
-        
+        console.log('server.port.' , typeof server.port, server.port);
+        console.log('server.id', server.id);
+        console.log('server.RESTAURANTS_URL,',server.RESTAURANTS_URL);
+        console.log('[fetchURL],', fetchURL);
+        debugger;
         
         // a fetch promise, with catch statement
         fetch(`${fetchURL}/${id}/?is_favorite=${isFavorite}`, { 
             method: 'PUT'})
           .then(response => {
             let jsonevent = response.json();
+            console.log('jsonevent,', jsonevent);
             console.log('check_status: ', jsonevent);
              // this resolves the p1 promise so it can be thenned below
              // this should be restaurant json
@@ -352,8 +360,8 @@ class DBHelper {
         '/n [restaurantjson.is_favorite]:', restaurantjson.is_favorite);
 
         const db = await DBHelper.openDB();
-        console.log('storeName:', storeName);
-        const tx = await db.transaction(storeName, 'readwrite').objectStore(storeName);
+        console.log('storeName:', RESTAURANTS);
+        const tx = await db.transaction(RESTAURANTS, 'readwrite').objectStore(RESTAURANTS);
         tx.get(id)
           .then(async request => {
             console.log('pulled this record from idb,', request);
@@ -372,22 +380,11 @@ class DBHelper {
       //resolve(restaurantsjson);
     });  
   }
-        // an idb promise with nested idb.transaction & respective catch statements
-      // this.openDB()
-      //   .then(db => {
-      //     const tx = db.transaction(storeName, 'readwrite').objectStore(storeName);
-      //     tx.get(id).then(request => {
-      //           console.log('your request is,', request);
-      //           let restaurant = request;
-      //           restaurant.is_favorite = isFavorite;
-      //           const requestUpdate = tx.put(restaurant);
-      //     })
-      //     .catch(err => console.log('unable to put into IDB,', err));
-      //   })
-      //   .catch(err => console.log('unable to open data store on db', err));
-      // resolve with a string saying Success
-      //resolve('Success');    
 
+  // static getCachedReviews(id) {
+  //   const db = await DBHelper.openDB();
+  //   const store = 
+  // }
    
 }
 

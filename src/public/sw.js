@@ -50,11 +50,14 @@ self.addEventListener('fetch', event => {
 
 function fetchThenCache(event) {
   if (event.request.cache === 'only-if-cached' && event.request.mode !== 'same-origin') return;
+   console.log('[fetcheventrequest]', event.request);
    return fetch(event.request).then(res => {
+    console.log('[fetchthencache],', res);
     if (!res.url) return res;
      if (new URL(res.url).origin !== location.origin) return res;
  
      return caches.open(cacheID).then(cache => {
+       console.log('[fetchthencache]', cache);
        cache.put(event.request, res.clone());
        return res;
      });
