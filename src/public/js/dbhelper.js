@@ -38,7 +38,7 @@ var Server = {
         .then(response => response.json())
           .then(jsonData => {
             console.log('[fetcjdata]:jsonData:',jsonData);
-            resolve(null, jsonData);
+            resolve(jsonData);
           })
            .catch(e => reject(`Request failed. Returned ${e}`, null));
     });
@@ -46,7 +46,7 @@ var Server = {
 
 
 }
-debugger;
+
 var server = Object.create(Server);
 const  RESTAURANTS_URL =[server.PORT, 'restaurants'];
 const  RESTAURANT_BY_ID = [server.PORT, 'restaurants', server.id];
@@ -80,25 +80,41 @@ class DBHelper {
 
   // a static method that will get open the store connection and return it.  Is possibly promise.  
   static getStore(storeName, mode, dbService) {
-    return dbService.transaction(storeName, mode).objectStore(storeName);
-  };
- 
+    const tx = dbService.transaction(storeName, mode);
+    return tx;
+  }
+
+  static gettingAll(storeName) {
+    return DBHelper.openDB().then(db => {
+      return db.transaction(storeName)
+        .objectStore(storeName).getAll();
+    });
+  }
+
+  static addToIDB(obj, storeName) {
+    return new Promise((resolve,reject) => {
+      DBHelper.openDB().then(db => {
+        const tx = db.transaction(storeName, 'readwrite');
+        tx.objectStore(storeName).put(obj);
+        resolve(tx.complete);
+      });
+    });
+  }
+  
   // a static method that opens db, get's store 
   // and puts data from network service paramaters into db
   // @param {*} networkService
-  static serverToIDB(networkService, storeName, dbService) { 
+  static serverToIDB(networkService, storeName) { 
     return new Promise(async(resolve, reject) => {
-      let store = await DBHelper.getStore(storeName, 'readwrite', dbService);
-      debugger;
-      serverData = await server.requestData(networkService)
-        .then(response => response.json());
-      serverData.forEach(resource => dbtransaction.put(resource)
-        .then(console.log(`${resource} put into database`)));
+      //debugger;
+      let serverData = await server.requestData(networkService);
+      serverData.forEach(resource => {
+        DBHelper.addToIDB(resource, storeName);
+      })
+      .then((message) => console.log('Done,', message));
       resolve('Resources were successfully put in IDB'); 
         })  
         .catch(e => console.log('it didn\'t work ', e));
-      
-       
   }  // this ends the async restaurants functional code which returned restaurants 
   
   /**
@@ -107,7 +123,7 @@ class DBHelper {
   */
   static dataFromIDB(storeName, dbService, id) {
     return new Promise((resolve,reject) => {
-      if (!id) resolve(DBHelper.getStore(storeName, 'readwrite', dbService).getAll());
+      if (!id) resolve(DBHelper.gettingAll(storeName));
       else resolve(getStore(storeName, 'readwrite', dbService).index(id));
     });
   }
@@ -118,7 +134,7 @@ class DBHelper {
     let restaurantArray = []
     let db = await DBHelper.openDB();
     debugger;
-    restaurantArray = await DBHelper.getStore(RESTAURANT_STORE, 'readwrite', db).getAll();
+    restaurantArray = await DBHelper.gettingAll(RESTAURANT_STORE);
     console.log('[restaurantArray] ,', restaurantArray);
     debugger;
     if (restaurantArray.length === 0){
@@ -268,60 +284,6 @@ class DBHelper {
       marker.addTo(newMap);
     return marker;
   }
-
-  // static async toggleRestaurantFavorite(id, isFavorite) {
-  //   // I want to see what the state is in the database at this point
-  //   this.openDB().then(db => {
-  //     const tx = db.transaction(storeName, 'readwrite').objectStore(storeName);
-  //     tx.get(id).then(request => {
-  //       console.log('in the database, here is the state before switcharoo,', request);
-  //     }).catch(e => console.log('damn,',e));
-  //   });
-    
-  //   //Switcharoo code, if the state is true, make it false, vice versa
-  //   let restaurant;
-  //   isFavorite = (isFavorite === 'true' || isFavorite === true ? false : true); 
-  //   console.log('after switcharoo: ', isFavorite);   // Toggling state so reversing the value
-    
-  //   //try to fetch from server and put the switched state to the server
-  //   try {
-  //       const fetchURL = server.RESTAURANTS_URL;
-  //       let holdup;
-
-  //       restaurant = await fetch(`${fetchURL}/${id}/?is_favorite=${isFavorite}`, { 
-  //         method: 'PUT',
-  //         //body: `is_favorite=${ isFavorite }`
-  //       });
-  //       console.log('what might the state of restaurant be?', restaurant)
-        
-  //       const check_status = await fetch(`${fetchURL}/${id}/?is_favorite=${isFavorite}`).then(response => response.json());
-        
-  //       console.log('check_status:', check_status);
-        
-  //       if (!restaurant) {
-  //         console.log('! restaurant is proving false');
-  //         return; // CORS Prefetch OPTIONS skip
-  //       }
-  //   // put the new state to idb.  For some reason, this code block is not waiting
-  //   // for this request to finish before escaping back to restaurant_info.js
-
-  //       holdup = await this.openDB()
-  //         .then(db => {
-  //           const tx = db.transaction(storeName, 'readwrite').objectStore(storeName);
-  //           tx.get(id)
-  //             .then(request => {
-  //               console.log('your request is,', request);
-  //               let restaurant = request;
-  //               restaurant.is_favorite = isFavorite;
-  //               const requestUpdate = tx.put(restaurant);
-  //             })
-  //             .catch(e => console.log('damn,', e));
-  //         });
-  //   } catch (error) {
-  //           console.log(error, "'PUT' request did not work.");
-  //   }
-  //   return true;
-  // }
   
   //  creating a new method that is written in promise synt
   static toggle(id, isFavorite) {
@@ -330,15 +292,15 @@ class DBHelper {
       let p1 = new Promise((resolve, reject) => {
       //Switcharoo code, if the state is true, make it false, vice versa
         let restaurant;
-        console.log('server.RESTAURANTS_URL', server.RESTAURANTS_URL);
-        const fetchURL = GET_URL(server.RESTAURANTS_URL);
+        console.log('server.RESTAURANTS_URL', RESTAURANTS_URL);
+        const fetchURL = GET_URL(server.PORT, 'restaurants');
         isFavorite = (isFavorite === 'true' || isFavorite === true ? false : true); 
         console.log('after switcharoo: ', isFavorite); 
         console.log('server.port.' , typeof server.port, server.port);
         console.log('server.id', server.id);
-        console.log('server.RESTAURANTS_URL,',server.RESTAURANTS_URL);
+        console.log('server.RESTAURANTS_URL,',RESTAURANTS_URL);
         console.log('[fetchURL],', fetchURL);
-        debugger;
+
         
         // a fetch promise, with catch statement
         fetch(`${fetchURL}/${id}/?is_favorite=${isFavorite}`, { 
@@ -354,14 +316,14 @@ class DBHelper {
           .catch(err => console.log('did not get a response from put request:', err));
       });
 
-      p1.then(async restaurantjson=> {
+      p1.then(async restaurantjson => {
 
         console.log('[restaurantsjson.then]', restaurantjson, 
-        '/n [restaurantjson.is_favorite]:', restaurantjson.is_favorite);
+        '\n [restaurantjson.is_favorite]:', restaurantjson.is_favorite);
 
         const db = await DBHelper.openDB();
-        console.log('storeName:', RESTAURANTS);
-        const tx = await db.transaction(RESTAURANTS, 'readwrite').objectStore(RESTAURANTS);
+        console.log('storeName:', RESTAURANT_STORE);
+        const tx = await db.transaction(RESTAURANT_STORE, 'readwrite').objectStore(RESTAURANT_STORE);
         tx.get(id)
           .then(async request => {
             console.log('pulled this record from idb,', request);
