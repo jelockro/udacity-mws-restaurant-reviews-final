@@ -5,6 +5,10 @@ const RESTAURANT_STORE = 'restaurants'; //for store name
 const REVIEWS_STORE = 'reviews'; // for store name'
 let restaurantArray = [];
 let reviewsArray = [];
+const POST_HEADERS = {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+};
 
 //const port = '1337';
 function GET_URL(port, filepath, id) { 
@@ -17,6 +21,21 @@ function GET_URL(port, filepath, id) {
       return `http://localhost:${port}/${filepath}/${id}`;
     } 
 }
+const request = async (url, method = 'GET', headers={}, body=null) => {
+    const options = {
+        method
+    };
+    if (headers) options.headers = headers;
+    if (body) options.body = JSON.stringify(body);
+    debugger;
+    const response = await fetch(url, options);
+    console.trace('request:response', response);
+    if (options && options.method) {
+        return await response.json();
+    }
+    return response;
+};
+
 /**
  * server object
  * 
@@ -63,6 +82,15 @@ function findById(jsonArray, id, callback) {
   if (result) return(null, result);
   else return('data does not exist', null);
 }
+const transformForClient = (review) => {
+    if(review.createdAt) review.createdAt = new Date(review.createdAt);
+    if(review.updatedAt) review.updatedAt = new Date(review.updatedAt);
+};
+
+const transformForFetch = (review) => {
+    delete review.synced;
+    delete review.id;
+};
 
 class DBHelper {
 
@@ -134,18 +162,18 @@ class DBHelper {
   
   static async fetchReviews(callback) {
     if (!window.indexedDB) callback(null, server.requestData(REVIEWS_URL));
-    debugger;
+    //debugger;
     let reviewsArray = [];
     let db = await DBHelper.openDB();
-    debugger;
+    //debugger;
     reviewsArray = await DBHelper.gettingAll(REVIEWS_STORE);
     console.log('[reviewsArray] ,', reviewsArray);
-    debugger;
+    //debugger;
     if (reviewsArray.length === 0) {
-      debugger;
+      //debugger;
       DBHelper.serverToIDB(REVIEWS_URL, REVIEWS_STORE, db)
         .then(result => {
-          debugger;
+          //debugger;
           console.log(result);
           DBHelper.dataFromIDB(REVIEWS_STORE, db).then(data => callback(null, data));
         });
@@ -156,7 +184,7 @@ class DBHelper {
 
   static async fetchRestaurants(callback) {
     if (!window.indexedDB) callback(null, server.requestData(RESTAURANTS_URL));
-    debugger;
+  
     if (restaurantArray.length === 0) {
       let db = await DBHelper.openDB();
       DBHelper.serverToIDB(RESTAURANTS_URL, RESTAURANT_STORE, db)
@@ -191,8 +219,9 @@ class DBHelper {
     }
     else DBHelper.fetchReviews((error, reviews) => {
       if (error) callback(error, null);
+      console.trace('fetchReviews: reviews', reviews);
       const results = reviews.filter(r => r.restaurant_id === parseInt(id, 10));
-      console.trace('[fetchReviewsById]: results', results);
+      console.trace('[fetchReviewsById]: results, id', results, id, );
       callback (null, results);
     });   
   }
@@ -236,7 +265,6 @@ class DBHelper {
    */
   static fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, callback) {
     // Fetch all restaurants
-    debugger;
     DBHelper.fetchRestaurants((error, restaurants) => {
       if (error) {
         callback(error, null);
@@ -406,22 +434,29 @@ class DBHelper {
           let result, success = true;
           try {
               transformForFetch(review, new Date());
-              result = await request(`${ENDPOINT}/reviews`, 'POST', POST_HEADERS, review);
+              let fetchurl = GET_URL(REVIEWS_BY_ID[0], REVIEWS_BY_ID[1] );
+              console.trace('addReview fetchurl:', fetchurl);
+              result = await request(`${fetchurl}`, 'POST', POST_HEADERS, review);
+              debugger;
               if (result) {
                   // Check for result null which is returned by PreFlight OPTIONS call due to cross domain access
+                  debugger;
                   transformForClient(result);
                   result.synced = 1;
               }
           } catch (error) {
               // when request throws an error that means fetch failed and result will be null
               // so we save the existing review
+              console.trace('fetch error:', error);
               result = review;
               success = false;
           }
 
-          const dbService = await openDB();
-          const store = getStore(REVIEWS_STORE, 'readwrite', dbService);       
+          const dbService = await DBHelper.openDB();
+          const tx = DBHelper.getStore(REVIEWS_STORE, 'readwrite', dbService);       
+          const store = tx.objectStore(REVIEWS_STORE);
           if(!success) {
+              debugger;
               const id = await store.count();
               transformForClient(result);
               result.synced = 0;

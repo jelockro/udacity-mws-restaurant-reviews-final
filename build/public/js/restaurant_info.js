@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
  * Get a parameter by name from page URL.
  */
 getParameterByName = (name, url) => {
-  debugger;
+  //debugger;
   if (!url)
     url = window.location.href;
   name = name.replace(/[\[\]]/g, '\\$&');
@@ -259,7 +259,7 @@ createReviewHTML = (review) => {
   li.appendChild(name);
 
   const date = document.createElement('p');
-  date.innerHTML = review.date;
+  date.innerHTML = review.createdAt;
   li.appendChild(date);
 
   const rating = document.createElement('p');
@@ -288,7 +288,6 @@ fillBreadcrumb = (restaurant=self.restaurant) => {
 
 addReview = async(event) => {
     event.preventDefault();
-    debugger;
     const name = document.getElementById('name');
     const rating = document.getElementById('rating');
     const comments = document.getElementById('comments');
