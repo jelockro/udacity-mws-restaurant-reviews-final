@@ -2,7 +2,10 @@
 const dbName = 'mws_DB';
 const version = 3; 
 const RESTAURANT_STORE = 'restaurants'; //for store name
-const REVIEWS_STORE ='reviews'; // for store name
+const REVIEWS_STORE = 'reviews'; // for store name'
+let restaurantArray = [];
+let reviewsArray = [];
+
 //const port = '1337';
 function GET_URL(port, filepath, id) { 
     if (!id) { 
@@ -72,7 +75,7 @@ class DBHelper {
       restaurantStore.createIndex('name', 'name', { unique: false }); 
 
       const reviewStore = upgradeDB.createObjectStore(REVIEWS_STORE, { keyPath: 'id' }); 
-      reviewStore.createIndex('name', 'name', { unique: false }); 
+      reviewStore.createIndex('restaurant_id', 'restaurant_id', { unique: false }); 
       });
   }
 
@@ -144,7 +147,7 @@ class DBHelper {
         .then(result => {
           debugger;
           console.log(result);
-          DBHelper.datafromIDB(REVIEWS_STORE, db).then(data => callback(null, data));
+          DBHelper.dataFromIDB(REVIEWS_STORE, db).then(data => callback(null, data));
         });
     }
     callback(null, reviewsArray);
@@ -154,19 +157,13 @@ class DBHelper {
   static async fetchRestaurants(callback) {
     if (!window.indexedDB) callback(null, server.requestData(RESTAURANTS_URL));
     debugger;
-    let restaurantArray = [];
-    let db = await DBHelper.openDB();
-    debugger;
-    restaurantArray = await DBHelper.gettingAll(RESTAURANT_STORE);
-    console.log('[restaurantArray] ,', restaurantArray);
-    debugger;
     if (restaurantArray.length === 0) {
-      debugger;
+      let db = await DBHelper.openDB();
       DBHelper.serverToIDB(RESTAURANTS_URL, RESTAURANT_STORE, db)
         .then(result => {
           debugger;
           console.log(result);
-          DBHelper.datafromIDB(RESTAURANT_STORE, db).then(data => callback(null, data));
+          DBHelper.dataFromIDB(RESTAURANT_STORE, db).then(data => callback(null, data));
         });
     }
     else DBHelper.dataFromIDB(RESTAURANT_STORE, db).then(data => callback(null, data));
@@ -384,7 +381,7 @@ class DBHelper {
       const tx = this.getStore(REVIEWS_STORE, 'readwrite', dbService);
       const store = tx.objectStore(REVIEWS_STORE);
       console.log('store in getCachedReviews:', store);
-      return store.index(REVIEWS_STORE).getAll(id);
+      return store.index('restaurant_id').getAll(id);
   }
   static async addReview(review) {
       const errors = [];
