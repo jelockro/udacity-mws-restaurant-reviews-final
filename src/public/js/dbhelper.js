@@ -75,8 +75,6 @@ class DBHelper {
       reviewStore.createIndex('name', 'name', { unique: false }); 
       });
   }
-  
-
 
   // a static method that will get open the store connection and return it.  Is possibly promise.  
   static getStore(storeName, mode, dbService) {
@@ -109,13 +107,16 @@ class DBHelper {
       //debugger;
       let serverData = await server.requestData(networkService);
       serverData.forEach(resource => {
-        DBHelper.addToIDB(resource, storeName);
-      })
-      .then((message) => console.log('Done,', message));
+        console.log('resouce form server,', resource);
+        DBHelper.addToIDB(resource, storeName)
+          .then(message => {
+            console.log('Done,', message);
+          });
+      });
       resolve('Resources were successfully put in IDB'); 
-        })  
-        .catch(e => console.log('it didn\'t work ', e));
-  }  // this ends the async restaurants functional code which returned restaurants 
+    })  
+      .catch(e => console.log('it didn\'t work ', e));
+  }  
   
   /**
   *This should return an object, individual restaurant or review, or all restaurants and reviews.
@@ -128,6 +129,28 @@ class DBHelper {
     });
   }
   
+  static async fetchReviews(callback) {
+    if (!window.indexedDB) callback(null, server.requestData(REVIEWS_URL));
+    debugger;
+    let reviewsArray = [];
+    let db = await DBHelper.openDB();
+    debugger;
+    reviewsArray = await DBHelper.gettingAll(REVIEWS_STORE);
+    console.log('[reviewsArray] ,', reviewsArray);
+    debugger;
+    if (reviewsArray.length === 0) {
+      debugger;
+      DBHelper.serverToIDB(REVIEWS_URL, REVIEWS_STORE, db)
+        .then(result => {
+          debugger;
+          console.log(result);
+          DBHelper.datafromIDB(REVIEWS_STORE, db).then(data => callback(null, data));
+        });
+    }
+    callback(null, reviewsArray);
+
+  }
+
   static async fetchRestaurants(callback) {
     if (!window.indexedDB) callback(null, server.requestData(RESTAURANTS_URL));
     debugger;
@@ -159,6 +182,21 @@ class DBHelper {
     }
     else DBHelper.fetchRestaurants((error, restaurants) => {
       callback(null, findById(restaurants, id));
+    });   
+  }
+  /**
+  * Fetch reviews by ID.
+  */
+  static fetchReviewsById(id, callback) {
+    if (!window.indexedDB) {
+      server.id = id;
+      callback(null, server.requestData(REVIEWS_BY_ID));
+    }
+    else DBHelper.fetchReviews((error, reviews) => {
+      if (error) callback(error, null);
+      const results = reviews.filter(r => r.restaurant_id === parseInt(id, 10));
+      console.trace('[fetchReviewsById]: results', results);
+      callback (null, results);
     });   
   }
 
@@ -340,37 +378,64 @@ class DBHelper {
       //resolve(restaurantsjson);
     });  
   }
-
-  static async fetchReviews(callback) {
-    if (!window.indexedDB) callback(null, server.requestData(REVIEWS_URL));
-    debugger;
-    let reviewsArray = [];
-    let db = await DBHelper.openDB();
-    debugger;
-    reviewsArray = await DBHelper.gettingAll(REVIEWS_STORE);
-    console.log('[reviewsArray] ,', reviewsArray);
-    debugger;
-    if (reviewsArray.length === 0) {
+  static async getCachedReviews(id) {
+      const dbService = await this.openDB();
       debugger;
-      DBHelper.serverToIDB(REVIEWS_URL, REVIEWS_STORE, db)
-        .then(result => {
-          debugger;
-          console.log(result);
-          DBHelper.datafromIDB(REVIEWS_STORE, db).then(data => callback(null, data));
-        });
-    }
-    else DBHelper.dataFromIDB(REVIEWS_STORE, db).then(data => callback(null, data));
-
+      const tx = this.getStore(REVIEWS_STORE, 'readwrite', dbService);
+      const store = tx.objectStore(REVIEWS_STORE);
+      console.log('store in getCachedReviews:', store);
+      return store.index(REVIEWS_STORE).getAll(id);
   }
+  static async addReview(review) {
+      const errors = [];
+   
+      if (!review.restaurant_id) {
+          errors.push('restaurant_id');
+      }
 
-  static fetchReviewsById(id, callback) {
-    if (!window.indexedDB) {
-      server.id = id;
-      callback(null, server.requestData(REVIEWS_BY_ID));
-    }
-    else DBHelper.fetchReviews((error, reviews) => {
-      callback(null, findById(reviews, id));
-    });   
+      if (!review.name) {
+          errors.push('name');
+      }
+
+      if (!review.rating) {
+          errors.push('rating');
+      }
+
+      if (!review.comments) {
+          errors.push('comments');
+      }        
+
+      if (errors.length === 0) {
+          let result, success = true;
+          try {
+              transformForFetch(review, new Date());
+              result = await request(`${ENDPOINT}/reviews`, 'POST', POST_HEADERS, review);
+              if (result) {
+                  // Check for result null which is returned by PreFlight OPTIONS call due to cross domain access
+                  transformForClient(result);
+                  result.synced = 1;
+              }
+          } catch (error) {
+              // when request throws an error that means fetch failed and result will be null
+              // so we save the existing review
+              result = review;
+              success = false;
+          }
+
+          const dbService = await openDB();
+          const store = getStore(REVIEWS_STORE, 'readwrite', dbService);       
+          if(!success) {
+              const id = await store.count();
+              transformForClient(result);
+              result.synced = 0;
+              result.id = id * -1;
+              errors.push('fetch');
+          }
+          
+          store.put(result);
+      }
+
+      return errors;
   }
 }
 

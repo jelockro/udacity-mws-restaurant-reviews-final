@@ -6,6 +6,9 @@
 let restaurant;
 var newMap;
 
+let form = this.document.getElementById('reviews-form');
+form.addEventListener('submit', (event) => this.addReview(event));
+
 /**
  * Initialize map as soon as the page is loaded.
  */
@@ -17,6 +20,25 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
   })
 });
+
+/**
+ * Get a parameter by name from page URL.
+ */
+getParameterByName = (name, url) => {
+  debugger;
+  if (!url)
+    url = window.location.href;
+  name = name.replace(/[\[\]]/g, '\\$&');
+  const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`),
+    results = regex.exec(url);
+  if (!results)
+    return null;
+  if (!results[2])
+    return '';
+  return decodeURIComponent(results[2].replace(/\+/g, ' '));
+};
+
+let id = getParameterByName('id');
 /**
  * Initialize leaflet map
  */
@@ -61,7 +83,8 @@ initMap = () => {
 } */
 
 /**
- * Get current restaurant from page URL.
+ * Get current restaurant from page URL, used only in
+ * initializing the map
  */
 fetchRestaurantFromURL = (callback) => {
   if (self.restaurant) { // restaurant already fetched!
@@ -84,6 +107,7 @@ fetchRestaurantFromURL = (callback) => {
     });
   }
 }
+
 
 /**
  * Create restaurant HTML and add it to the webpage
@@ -135,6 +159,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   }
   // fill reviews
   fillReviewsHTML();
+
 }
 
 async function toggleFavorite(event) {
@@ -198,24 +223,30 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
 /**
  * Create all reviews HTML and add them to the webpage.
  */
-fillReviewsHTML = (reviews = self.restaurant.reviews) => {
+fillReviewsHTML = (id = self.restaurant.id) => {
   const container = document.getElementById('reviews-container');
   const title = document.createElement('h2');
   title.innerHTML = 'Reviews';
   container.appendChild(title);
-
-  if (!reviews) {
-    const noReviews = document.createElement('p');
-    noReviews.innerHTML = 'No reviews yet!';
-    container.appendChild(noReviews);
-    return;
-  }
-  const ul = document.getElementById('reviews-list');
-  reviews.forEach(review => {
-    ul.appendChild(createReviewHTML(review));
+  // need to fetch reviews, first from cache, then online
+  DBHelper.fetchReviewsById(id, (error, reviews) => {
+    if (error) {
+      console.trace('unable to fetch reviews,', error);
+    }
+    if (!reviews) {
+      const noReviews = document.createElement('p');
+      noReviews.innerHTML = 'No reviews yet!';
+      container.appendChild(noReviews);
+      return;
+    }
+    const ul = document.getElementById('reviews-list');
+    reviews.forEach(review => {
+      ul.appendChild(createReviewHTML(review));
+    });
+    container.appendChild(ul);
   });
-  container.appendChild(ul);
 }
+
 
 /**
  * Create review HTML and add it to the webpage.
@@ -253,18 +284,74 @@ fillBreadcrumb = (restaurant=self.restaurant) => {
   breadcrumb.appendChild(li);
 }
 
-/**
- * Get a parameter by name from page URL.
- */
-getParameterByName = (name, url) => {
-  if (!url)
-    url = window.location.href;
-  name = name.replace(/[\[\]]/g, '\\$&');
-  const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`),
-    results = regex.exec(url);
-  if (!results)
-    return null;
-  if (!results[2])
-    return '';
-  return decodeURIComponent(results[2].replace(/\+/g, ' '));
+
+
+addReview = async(event) => {
+    event.preventDefault();
+    debugger;
+    const name = document.getElementById('name');
+    const rating = document.getElementById('rating');
+    const comments = document.getElementById('comments');
+    const reviewErrors = document.getElementById('review-errors');
+    const errors = await DBHelper.addReview({
+        restaurant_id: self.restaurant.id,
+        name: name.value,
+        rating: rating.value,
+        comments: comments.value,
+    });
+
+    if (errors.length === 0) {
+        name.value = '';
+        rating.value = '';
+        comments.value = '';
+        name.setAttribute('aria-invalid', 'false');
+        rating.setAttribute('aria-invalid', 'false');
+        comments.setAttribute('aria-invalid', 'false');
+        if (reviewErrors.childNodes.length > 0) reviewErrors.removeChild(reviewErrors.childNodes[0]);
+    } else {
+        const container = document.createElement('div');
+        container.id = 'review-errors-container';
+        const header = document.createElement('p');
+        header.id = 'review-errors-header';
+        header.innerText = `${errors.length} error${errors.length > 1 ? 's': ''} are found in the submission.`
+        container.appendChild(header);
+        const list = document.createElement('ul');
+        errors.forEach(error => {
+            const item = document.createElement('li');
+            let text;
+            switch(error) {
+                case 'name':
+                    text = 'name cannot be null or empty';
+                    name.setAttribute('aria-invalid', 'true');
+                    break;
+                case 'rating':
+                    text = 'rating cannot be null or empty';
+                    rating.setAttribute('aria-invalid', 'true');
+                    break;
+                case 'comments':
+                    text = 'comments cannot be null or empty';
+                    comments.setAttribute('aria-invalid', 'true');
+                    break;
+                case 'fetch':
+                    text = 'Network connection is unavailable. Data will be resent when the connection is available.';  
+                    name.value = '';
+                    rating.value = '';
+                    comments.value = '';
+                    break;                                          
+            }
+            item.innerText = text;
+            list.appendChild(item);
+        });
+        container.appendChild(list);
+        const existingContainer = document.getElementById('review-errors-container');
+        if (existingContainer) {
+            reviewErrors.replaceChild(container, existingContainer);
+        } else {
+            reviewErrors.appendChild(container);
+        }
+    }
+    debugger;
+    console.trace('self.restaurant.id:', self.restaurant.id);
+    this.fillReviewsHTML(await DBHelper.getCachedReviews(self.restaurant.id));
+    return false;
 }
