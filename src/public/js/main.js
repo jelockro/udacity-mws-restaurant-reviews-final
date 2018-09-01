@@ -113,6 +113,7 @@ const updateRestaurants = () => {
   const neighborhood = nSelect[nIndex].value;
 
   DBHelper.fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, (error, restaurants) => {
+    console.log('c&r restaurants', restaurants);
     if (error) { // Got an error!
       console.error(error);
     } else {

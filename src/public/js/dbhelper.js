@@ -1,23 +1,60 @@
 //const idb = require('idb');
 const dbName = 'mws_DB';
 const version = 3; 
+const DOMAIN = 'http://localhost:1337/';
 const RESTAURANT_STORE = 'restaurants'; //for store name
 const REVIEWS_STORE = 'reviews'; // for store name'
-let restaurantArray = [];
-let reviewsArray = [];
+
 const POST_HEADERS = {
     'Accept': 'application/json',
     'Content-Type': 'application/json'
 };
 
+// const idbrequest = indexedDB.open(dbName, version);
+
+// idbrequest.onerror = function (event) {
+//   // Handle errors.
+//   console.log('idb.open error,', event);
+// };
+// idbrequest.onupgradeneeded = function (event) {
+//   const db = event.target.result;
+//   const restaurantStore = db.createObjectStore(RESTAURANT_STORE, { keyPath: 'id' });
+//   const reviewsStore = db.createObjectStore(REVIEWS_STORE, { keyPath: 'id' }); 
+//   restaurantStore.createIndex('name', 'name', { unique: false }); 
+//   restaurantStore.createIndex('synced', 'synced', { unique: false }); 
+//   reviewsStore.createIndex('restaurants', 'restaurant_id', { unique: false }); 
+//   reviewsStore.createIndex('synced', 'synced', { unique: false }); 
+//   restaurantStore.transaction.oncomplete = function (event) {
+//     DBHelper.serverToIDB(RESTAURANTS_URL, RESTAURANT_STORE);
+//   };
+//   reviewsStore.transaction.oncomplete = function (event) {
+//     DBHelper.serverToIDB(REVIEWS_URL, REVIEWS_STORE);
+//   };
+// };
+
+const openDB = () => {
+  debugger;
+  return idb.open(dbName, version, upgradeDB => {
+    switch(upgradeDB.oldversion) {
+      case 0:
+        const restaurantStore = upgradeDB.createObjectStore(RESTAURANT_STORE, { keyPath: 'id' });
+        const reviewsStore = upgradeDB.createObjectStore(REVIEWS_STORE, { keyPath: 'id' });
+        restaurantStore.createIndex('name', 'name', { unique: false }); 
+        restaurantStore.createIndex('synced', 'synced', { unique: false }); 
+        reviewsStore.createIndex('restaurants', 'restaurant_id', { unique: false }); 
+        reviewsStore.createIndex('synced', 'synced', { unique: false }); 
+        console.log('stores & indexes created');
+    }
+  });
+};
 //const port = '1337';
 function GET_URL(port, filepath, id) { 
     if (!id) { 
-      console.trace('!id port, fileapth, id,', port, filepath, id)
+      //console.trace('!id port, fileapth, id,', port, filepath, id);
       return `http://localhost:${port}/${filepath}`;
     }
     else {
-      console.log('port, fileapth, id,', port, filepath, id);
+      //console.log('port, fileapth, id,', port, filepath, id);
       return `http://localhost:${port}/${filepath}/${id}`;
     } 
 }
@@ -29,7 +66,7 @@ const request = async (url, method = 'GET', headers={}, body=null) => {
     if (body) options.body = JSON.stringify(body);
     debugger;
     const response = await fetch(url, options);
-    console.trace('request:response', response);
+    //console.trace('request:response', response);
     if (options && options.method) {
         return await response.json();
     }
@@ -54,20 +91,18 @@ var Server = {
   */
   requestData : (networkService) => {
     return new Promise((resolve, reject) =>{
-      console.log('[requestdata]:networkService:', networkService);
+      //console.log('[requestdata]:networkService:', networkService);
 
       fetch(GET_URL(networkService[0], networkService[1]))
         .then(response => response.json())
           .then(jsonData => {
-            console.log('[fetcjdata]:jsonData:',jsonData);
+            //console.log('[fetcjdata]:jsonData:',jsonData);
             resolve(jsonData);
           })
            .catch(e => reject(`Request failed. Returned ${e}`, null));
     });
-  },
-
-
-}
+  }
+};
 
 var server = Object.create(Server);
 const  RESTAURANTS_URL =[server.PORT, 'restaurants'];
@@ -83,8 +118,8 @@ function findById(jsonArray, id, callback) {
   else return('data does not exist', null);
 }
 const transformForClient = (review) => {
-    if(review.createdAt) review.createdAt = new Date(review.createdAt);
-    if(review.updatedAt) review.updatedAt = new Date(review.updatedAt);
+    if (review.createdAt) review.createdAt = new Date(review.createdAt);
+    if (review.updatedAt) review.updatedAt = new Date(review.updatedAt);
 };
 
 const transformForFetch = (review) => {
@@ -96,59 +131,77 @@ class DBHelper {
 
 
   //  static function to open the indexedDB database
-  static openDB() {
-    return idb.open(dbName, version, upgradeDB => {
-      //debugger;
-      const restaurantStore = upgradeDB.createObjectStore(RESTAURANT_STORE, { keyPath: 'id' }); 
-      restaurantStore.createIndex('name', 'name', { unique: false }); 
 
-      const reviewStore = upgradeDB.createObjectStore(REVIEWS_STORE, { keyPath: 'id' }); 
-      reviewStore.createIndex('restaurant_id', 'restaurant_id', { unique: false }); 
-      });
-  }
 
   // a static method that will get open the store connection and return it.  Is possibly promise.  
-  static getStore(storeName, mode, dbService) {
-    const tx = dbService.transaction(storeName, mode);
-    return tx;
+  static getStore(storeName, dbService) {
+    //console.log('getStore dbService', dbService);
+    debugger;
+    return dbService.transaction(storeName, 'readwrite').objectStore(storeName);
   }
 
-  static gettingAll(storeName) {
-    return DBHelper.openDB().then(db => {
-      return db.transaction(storeName)
-        .objectStore(storeName).getAll();
-    });
+  static async gettingAll(storeName) {
+    let restaurants;
+    debugger;
+    const db = await openDB();
+    console.trace('db', db);
+    restaurants = db.transaction(storeName).objectStore(storeName).getAll();
+    return restaurants;
   }
 
-  static addToIDB(obj, storeName) {
-    return new Promise((resolve,reject) => {
-      DBHelper.openDB().then(db => {
-        const tx = db.transaction(storeName, 'readwrite');
-        tx.objectStore(storeName).put(obj);
-        resolve(tx.complete);
-      });
-    });
-  }
-  
-  // a static method that opens db, get's store 
-  // and puts data from network service paramaters into db
-  // @param {*} networkService
-  static serverToIDB(networkService, storeName) { 
+  static addToIDB(obj, storeName, dbService) {
     return new Promise(async(resolve, reject) => {
-      //debugger;
-      let serverData = await server.requestData(networkService);
-      serverData.forEach(resource => {
-        console.log('resouce form server,', resource);
-        DBHelper.addToIDB(resource, storeName)
-          .then(message => {
-            console.log('Done,', message);
-          });
-      });
-      resolve('Resources were successfully put in IDB'); 
-    })  
-      .catch(e => console.log('it didn\'t work ', e));
-  }  
+        const store = await DBHelper.getStore(storeName, dbService);
+        store.put(obj);//.then(console.log('yay'));
+        resolve(obj);
+    });
+  }
   
+  /** a static method that tries network first,
+  * then opens db, get's store 
+  * and transforms data from network service paramaters 
+  * before putting into Idb
+  * @param {*} networkService
+  */
+  static serverToIDB(networkService, storeName, transform = null, dbService = null) { 
+    return new Promise(async(resolve, reject) => {
+      let Data;
+      let Message;
+      try {
+        Data = await server.requestData(networkService);
+        //console.log('Data', Data);
+        if (!dbService) {
+          dbService = await openDB();
+        }
+        const store = await DBHelper.getStore(storeName, dbService);
+        Data = Data.map(resource => {
+          //console.log('resouce form server,', resource);
+          if (transform) {
+            transform(resource);
+          }
+          //console.log('storeName', )
+          debugger;
+          resource.synced = 1;
+
+          debugger;
+          store.put(resource);
+          debugger;
+          return resource;
+
+  
+          //return Message;
+        });
+        console.log('DATa,', Data);
+      }
+      catch (error) {
+        console.trace('[serverToIdb Error]', error);
+        debugger;
+        Data = await DBHelper.gettingAll(storeName);
+      }
+      resolve(Data); 
+    });
+  }  
+
   /**
   *This should return an object, individual restaurant or review, or all restaurants and reviews.
   *
@@ -161,42 +214,36 @@ class DBHelper {
   }
   
   static async fetchReviews(callback) {
-    if (!window.indexedDB) callback(null, server.requestData(REVIEWS_URL));
-    //debugger;
-    let reviewsArray = [];
-    let db = await DBHelper.openDB();
-    //debugger;
-    reviewsArray = await DBHelper.gettingAll(REVIEWS_STORE);
-    console.log('[reviewsArray] ,', reviewsArray);
-    //debugger;
-    if (reviewsArray.length === 0) {
-      //debugger;
-      DBHelper.serverToIDB(REVIEWS_URL, REVIEWS_STORE, db)
-        .then(result => {
-          //debugger;
-          console.log(result);
-          DBHelper.dataFromIDB(REVIEWS_STORE, db).then(data => callback(null, data));
-        });
+    let reviews;
+    // if not online capable
+    if (!window.indexedDB) {
+      reviews = server.requestData(REVIEWS_URL);
     }
-    callback(null, reviewsArray);
-
+    // utilizies serverToIDB to ensure syncing is up to date
+    const db = await openDB();
+    reviews = await DBHelper.serverToIDB(REVIEWS_URL, REVIEWS_STORE);
+    callback(null, reviews);
   }
 
   static async fetchRestaurants(callback) {
-    if (!window.indexedDB) callback(null, server.requestData(RESTAURANTS_URL));
-  
-    if (restaurantArray.length === 0) {
-      let db = await DBHelper.openDB();
-      DBHelper.serverToIDB(RESTAURANTS_URL, RESTAURANT_STORE, db)
-        .then(result => {
-          debugger;
-          console.log(result);
-          DBHelper.dataFromIDB(RESTAURANT_STORE, db).then(data => callback(null, data));
-        });
+    // if not offline capable
+    let restaurants;
+    if (!window.indexedDB) {
+      restaurants = await server.requestData(RESTAURANTS_URL);
     }
-    else DBHelper.dataFromIDB(RESTAURANT_STORE, db).then(data => callback(null, data));
-
+    // utilizies serverToIDB to ensure syncing is up to date
+    const db = await openDB();
+    restaurants = await DBHelper.serverToIDB(RESTAURANTS_URL, RESTAURANT_STORE, null, db)
+    .then(restaurantsarray => {
+      console.log('restaurantsarray', restaurantsarray);
+      restaurants = restaurantsarray;
+      return restaurants;
+    });
+    console.trace('restuarants,', restaurants);
+    callback(null, restaurants);
+ 
   }
+
   /**
    * Fetch a restaurant by its ID.
    */
@@ -219,9 +266,9 @@ class DBHelper {
     }
     else DBHelper.fetchReviews((error, reviews) => {
       if (error) callback(error, null);
-      console.trace('fetchReviews: reviews', reviews);
+      //console.trace('fetchReviews: reviews', reviews);
       const results = reviews.filter(r => r.restaurant_id === parseInt(id, 10));
-      console.trace('[fetchReviewsById]: results, id', results, id, );
+      //console.trace('[fetchReviewsById]: results, id', results, id, );
       callback (null, results);
     });   
   }
@@ -353,14 +400,14 @@ class DBHelper {
       let p1 = new Promise((resolve, reject) => {
       //Switcharoo code, if the state is true, make it false, vice versa
         let restaurant;
-        console.log('server.RESTAURANTS_URL', RESTAURANTS_URL);
+        //console.log('server.RESTAURANTS_URL', RESTAURANTS_URL);
         const fetchURL = GET_URL(server.PORT, 'restaurants');
         isFavorite = (isFavorite === 'true' || isFavorite === true ? false : true); 
-        console.log('after switcharoo: ', isFavorite); 
-        console.log('server.port.' , typeof server.port, server.port);
-        console.log('server.id', server.id);
-        console.log('server.RESTAURANTS_URL,',RESTAURANTS_URL);
-        console.log('[fetchURL],', fetchURL);
+        // console.log('after switcharoo: ', isFavorite); 
+        // console.log('server.port.' , typeof server.port, server.port);
+        // console.log('server.id', server.id);
+        // console.log('server.RESTAURANTS_URL,',RESTAURANTS_URL);
+        // console.log('[fetchURL],', fetchURL);
 
         
         // a fetch promise, with catch statement
@@ -368,8 +415,8 @@ class DBHelper {
             method: 'PUT'})
           .then(response => {
             let jsonevent = response.json();
-            console.log('jsonevent,', jsonevent);
-            console.log('check_status: ', jsonevent);
+            // console.log('jsonevent,', jsonevent);
+            // console.log('check_status: ', jsonevent);
              // this resolves the p1 promise so it can be thenned below
              // this should be restaurant json
             resolve(jsonevent);
@@ -382,19 +429,17 @@ class DBHelper {
         console.log('[restaurantsjson.then]', restaurantjson, 
         '\n [restaurantjson.is_favorite]:', restaurantjson.is_favorite);
 
-        const db = await DBHelper.openDB();
-        console.log('storeName:', RESTAURANT_STORE);
+        const db = await openDB();
+        //console.log('storeName:', RESTAURANT_STORE);
         const tx = await db.transaction(RESTAURANT_STORE, 'readwrite').objectStore(RESTAURANT_STORE);
         tx.get(id)
           .then(async request => {
-            console.log('pulled this record from idb,', request);
-            console.log('I will update this record with,', restaurantjson);
-            //let restaurant = request;
-            //restaurant.is_favorite = isFavorite;
-            console.log('restaurant.is_favorite into idb,', restaurantjson.is_favorite);
+            // console.log('pulled this record from idb,', request);
+            // console.log('I will update this record with,', restaurantjson);
+            // console.log('restaurant.is_favorite into idb,', restaurantjson.is_favorite);
             const requestUpdate = await tx.put(restaurantjson);
             const newObject = await tx.get(id);
-            console.log('newObject', newObject);
+            //console.log('newObject', newObject);
             resolve(newObject); //resolves the top-level promise
           })
           .catch(e => console.log('damn,', e));
@@ -404,10 +449,9 @@ class DBHelper {
     });  
   }
   static async getCachedReviews(id) {
-      const dbService = await this.openDB();
+      const dbService = await openDB();
       debugger;
-      const tx = this.getStore(REVIEWS_STORE, 'readwrite', dbService);
-      const store = tx.objectStore(REVIEWS_STORE);
+      const store = await DBHelper.getStore(REVIEWS_STORE, 'readwrite', dbService);
       console.log('store in getCachedReviews:', store);
       return store.index('restaurant_id').getAll(id);
   }
@@ -452,10 +496,9 @@ class DBHelper {
               success = false;
           }
 
-          const dbService = await DBHelper.openDB();
-          const tx = DBHelper.getStore(REVIEWS_STORE, 'readwrite', dbService);       
-          const store = tx.objectStore(REVIEWS_STORE);
-          if(!success) {
+          const dbService = await openDB();
+          const store = await DBHelper.getStore(REVIEWS_STORE, 'readwrite', dbService);       
+          if (!success) {
               debugger;
               const id = await store.count();
               transformForClient(result);
@@ -469,5 +512,70 @@ class DBHelper {
 
       return errors;
   }
+  static async sync() {
+    let storeRestaurants, tx, storeReviews, unsyncedRestaurants, unsyncedReviews, isFavorite;
+    let syncedReviews = [], syncedRestaurants = [];
+    const dbService = await openDB();
+    debugger;
+    try {
+        debugger;
+        storeRestaurants = await DBHelper.getStore(RESTAURANT_STORE, 'readwrite', dbService).index('synced');    
+        console.log('storeRestaurants', storeRestaurants);
+        debugger;
+
+        unsyncedRestaurants = await storeRestaurants.getAll(0);
+        debugger;
+        for (const restaurant of unsyncedRestaurants) {
+            isFavorite = (restaurant.is_favorite === 'true' || restaurant.is_favorite === true ? true : false);    // Handle API saving the values as strings after update
+            restaurant = await request(`${DOMAIN}/restaurants/${restaurant.id}/?is_favorite=${isFavorite}`, 'PUT');
+            if (restaurant) {
+                // Check for result null which is returned by PreFlight OPTIONS call due to cross domain access
+                restaurant.synced = 1;
+                syncedRestaurants.push(restaurant);
+            }
+        }
+
+        let unsyncedId, result;
+        storeReveiws = await DBHelper.getStore(REVIEWS_STORE, 'readwrite', dbService).index('synced');
+        unsyncedReviews = await storeReviews.getAll(0);
+        debugger;
+        for (const review of unsyncedReviews) {
+            // cannot use foreach since that will not allow async/await
+            unsyncedId = review.id;
+            transformForFetch(review);
+            result = await request(`${DOMAIN}/reviews`, 'POST', POST_HEADERS, review);
+            if (result) {
+                // Check for result null which is returned by PreFlight OPTIONS call due to cross domain access
+                transformForClient(result);
+                result.synced = 1;
+                result.unsyncedId = unsyncedId;
+                syncedReviews.push(result);  
+            }
+        }
+    } catch(error) { console.trace('OUCH!');}
+
+    if (syncedRestaurants.length > 0) {
+        storeRestaurants = await DBHelper.getStore(RESTAURANTS_STORE, 'readwrite', dbService);
+        syncedRestaurants.forEach((restaurants) => {
+            storeRestaurants.put(restaurants);
+        });
+    }
+
+    if (syncedReviews.length > 0) {
+        storeRestaurants = await getStore(RESTAURANTS_STORE, 'readwrite', dbService);
+        syncedReviews.forEach((review) => {
+            storeReviews.delete(review.unsyncedId);
+            delete review.unsyncedId;
+            storeReviews.put(review);
+        })
+    }
+
+    if (unsyncedRestaurants.length === 0 && unsyncedReviews.length === 0) {
+        return null;
+    }
+
+    return `Server sync completed. ${syncedRestaurants.length + syncedReviews.length} item(s).`;
+  }
+
 }
 

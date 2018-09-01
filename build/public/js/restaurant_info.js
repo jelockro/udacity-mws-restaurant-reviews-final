@@ -5,21 +5,46 @@
 
 let restaurant;
 var newMap;
-
+const supportsNotifications = ('Notification' in window);
 let form = this.document.getElementById('reviews-form');
 form.addEventListener('submit', (event) => this.addReview(event));
 
 /**
  * Initialize map as soon as the page is loaded.
  */
-document.addEventListener('DOMContentLoaded', (event) => {
+document.addEventListener('DOMContentLoaded', async function(event) {
   initMap();
-  const favoriteHitbox = this.document.getElementById('favorite-hitbox');
+  const favoriteHitbox = document.getElementById('favorite-hitbox');
   favoriteHitbox.addEventListener('click', (event) => {
     toggleFavorite(event);
-
-  })
+  });
+  if(navigator.onLine) {
+    // This sync will handle browsers that do not support online event and also when server is down without polling
+    const message = await DBHelper.sync();
+    if (supportsNotifications && Notification.permission === "default") {
+        Notification.requestPermission().then(function(result) {
+        });
+    } 
+    if (message) {
+        if (supportsNotifications && Notification.permission === "granted") {
+            new Notification(message);
+        } else {
+            console.log(`DOMContentLoaded: ${message}`);
+        }             
+    }
+  }
 });
+
+window.addEventListener('online', async function(event) {
+    const message = await DBHelper.sync();
+    if(!message) return;
+    if (supportsNotifications && Notification.permission === "granted") {
+        new Notification(message);
+    } else {
+        console.log(`online: ${message}`);
+    }    
+    initMap();        
+}); 
 
 /**
  * Get a parameter by name from page URL.
