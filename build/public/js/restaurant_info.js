@@ -189,14 +189,14 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
 
 async function toggleFavorite(event) {
     event.preventDefault();
-    console.log('before dbToggle, state of self.restaurant', self.restaurant);
-    console.log('before dbToggle, state of self.restaurant.is_favorite', self.restaurant.is_favorite);
+    //console.log('before dbToggle, state of self.restaurant', self.restaurant);
+    //console.log('before dbToggle, state of self.restaurant.is_favorite', self.restaurant.is_favorite);
 
     try {
         DBHelper.toggle(self.restaurant.id, self.restaurant.is_favorite)
           .then(success => {
-            console.log('Great Job', success);
-            console.log(self.restaurant.id);
+            //console.log('Great Job', success);
+            //console.log(self.restaurant.id);
             //self.location.reload();
             // fetchRestaurantFromURL((error, success) => {
             //   if (error) { console.log(error) } 
