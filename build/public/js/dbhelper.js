@@ -41,9 +41,9 @@ const request = async (url, method = 'GET', headers = {}, body = null) => {
     };
     if (headers) options.headers = headers;
     if (body) options.body = JSON.stringify(body);
-    console.log('url, options.headers, options.body:', url, options.headers, options.body);
+    //console.log('url, options.headers, options.body:', url, options.headers, options.body);
     const response = await fetch(url, options);
-    console.trace('request:response', response);
+    //console.trace('request:response', response);
     if (options && options.method) {
         
         return await response.json();
@@ -122,7 +122,7 @@ class DBHelper {
     let restaurants;
     //debugger;
     const db = await openDB();
-    console.trace('db', db);
+    //console.trace('db', db);
     restaurants = db.transaction(storeName).objectStore(storeName).getAll();
     return restaurants;
   }
@@ -151,7 +151,7 @@ class DBHelper {
       let Message;
       try {
         Data = await request(networkService);
-        console.log('Data', Data);
+        //console.log('Data', Data);
         if (!dbService) {
           dbService = await openDB();
         }
@@ -162,7 +162,7 @@ class DBHelper {
           if (transform) {
             transform(resource);
           }
-          console.log('storeName', storeName );
+          //console.log('storeName', storeName );
           //debugger;
           resource.synced = 1;
 
@@ -174,10 +174,10 @@ class DBHelper {
   
           //return Message;
         });
-        console.trace('DATa,', Data);
+        //console.trace('DATa,', Data);
       }
       catch (error) {
-        console.trace('[serverToIdb Error]', error);
+        //console.trace('[serverToIdb Error]', error);
         //debugger;
         Data = await DBHelper.gettingAll(storeName);
       }
@@ -476,8 +476,8 @@ class DBHelper {
           let result, success = true;
           try {
               transformForFetch(review, new Date());
-              console.log('fetchurl', fetchurl);
-              console.trace('addReview fetchurl, review:', fetchurl, review);
+              //console.log('fetchurl', fetchurl);
+              //console.trace('addReview fetchurl, review:', fetchurl, review);
               result = await request(`${DOMAIN}/reviews/`, 'POST', POST_HEADERS, review);;
               //debugger;
               if (result) {
@@ -489,7 +489,7 @@ class DBHelper {
           } catch (error) {
               // when request throws an error that means fetch failed and result will be null
               // so we save the existing review
-              console.trace('fetch error:', error);
+              //console.trace('fetch error:', error);
               result = review;
               success = false;
           }
@@ -503,9 +503,9 @@ class DBHelper {
               result.synced = 0;
               result.id = id * -1;
               errors.push('fetch');
-              console.log('errors', errors);
+              //console.log('errors', errors);
           }
-          console.log('store, result', store, result);
+          //console.log('store, result', store, result);
           //debugger;
           store.put(result);
       }
@@ -544,22 +544,22 @@ class DBHelper {
             //debugger;
             for (const review of unsyncedReviews) {
                 // cannot use foreach since that will not allow async/await
-                console.log('review,', review);
+                //console.log('review,', review);
                 //debugger;
                 unsyncedId = review.id;
                 transformForFetch(review);
-                console.log('transformed for fetch,', review);
+                //console.log('transformed for fetch,', review);
                 //debugger;
                 result = await request(`${DOMAIN}/reviews/`, 'POST', POST_HEADERS, review);
-                console.log('unsyced review request result', result);
+                //console.log('unsyced review request result', result);
                 if (result) {
                     // Check for result null which is returned by PreFlight OPTIONS call due to cross domain access
                     transformForClient(result);
                     result.synced = 1;
                     result.unsyncedId = unsyncedId;
-                    console.log('transformed result', result);
+                    //console.log('transformed result', result);
                     //debugger;
-                    console.log('syncedReviews', syncedReviews);
+                    //console.log('syncedReviews', syncedReviews);
                     syncedReviews.push(result);  
                 }
             }
