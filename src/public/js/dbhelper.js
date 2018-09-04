@@ -41,11 +41,11 @@ const request = async (url, method = 'GET', headers = {}, body = null) => {
     };
     if (headers) options.headers = headers;
     if (body) options.body = JSON.stringify(body);
-    //console.log('options.headers, options.body:', options.headers, options.body);
+    console.log('url, options.headers, options.body:', url, options.headers, options.body);
     const response = await fetch(url, options);
     console.trace('request:response', response);
     if (options && options.method) {
-        //console.log('response.json,', response.json());
+        
         return await response.json();
     }
     return response;
@@ -66,6 +66,11 @@ const transformForClient = (review) => {
 const transformForFetch = (review) => {
     delete review.synced;
     delete review.id;
+};
+
+const REVIEWSDOMAIN = (id) => {
+  const url = `${DOMAIN}/reviews/?restaurant_id=${id}`;
+  return url;
 };
 /**
  * server object
@@ -101,7 +106,9 @@ const server = Object.create(Server);
 const RESTAURANTS_URL = [server.PORT, 'restaurants'];
 const RESTAURANT_BY_ID = [server.PORT, 'restaurants', server.id];
 const REVIEWS_URL = [server.PORT, 'reviews'];
-const REVIEWS_BY_ID = [server.PORT, 'reviews', server.id];
+const REVIEWS_BY_ID = [server.PORT, 'reviews/?restaurant_id=<restaurant_id>', server.id];
+
+const RESTAURANTSDOMAIN = `${DOMAIN}/restaurants`;
 
 class DBHelper {
   // a static method that will get open the store connection and return it.  Is possibly promise.  
@@ -143,18 +150,19 @@ class DBHelper {
       let Data;
       let Message;
       try {
-        Data = await server.requestData(networkService);
-        //console.log('Data', Data);
+        Data = await request(networkService);
+        console.log('Data', Data);
         if (!dbService) {
           dbService = await openDB();
         }
         const store = await DBHelper.getStore(storeName, dbService);
+        //debugger;
         Data = Data.map(resource => {
-          console.log('resouce form server,', resource);
+          //console.log('resouce form server,', resource);
           if (transform) {
             transform(resource);
           }
-          //console.log('storeName', )
+          console.log('storeName', storeName );
           //debugger;
           resource.synced = 1;
 
@@ -166,7 +174,7 @@ class DBHelper {
   
           //return Message;
         });
-        console.log('DATa,', Data);
+        console.trace('DATa,', Data);
       }
       catch (error) {
         console.trace('[serverToIdb Error]', error);
@@ -196,10 +204,9 @@ class DBHelper {
     }
     // utilizies serverToIDB to ensure syncing is up to date
     const db = await openDB();
-    reviews = await DBHelper.serverToIDB(REVIEWS_URL, REVIEWS_STORE, null, db)
+    reviews = await DBHelper.serverToIDB(REVIEWS_BY_ID, REVIEWS_STORE, null, db)
       .then(reviewsArray => {
-        reviews = reviewsArray;
-        return reviews;
+        return reviewsArray;
       });
     callback(null, reviews);
   }
@@ -212,7 +219,7 @@ class DBHelper {
     }
     // utilizies serverToIDB to ensure syncing is up to date
     const db = await openDB();
-    restaurants = await DBHelper.serverToIDB(RESTAURANTS_URL, RESTAURANT_STORE, null, db)
+    restaurants = await DBHelper.serverToIDB(RESTAURANTSDOMAIN, RESTAURANT_STORE, null, db)
       .then(restaurantsarray => {
         //console.log('restaurantsarray', restaurantsarray);
         restaurants = restaurantsarray;
@@ -226,6 +233,7 @@ class DBHelper {
    * Fetch a restaurant by its ID.
    */
   static fetchRestaurantById(id, callback) {
+    
     if (!window.indexedDB) {
       server.id = id;
       callback(null, server.requestData(RESTAURANT_BY_ID));
@@ -240,19 +248,23 @@ class DBHelper {
   /**
   * Fetch reviews by ID.
   */
-  static fetchReviewsById(id, callback) {
+  static async fetchReviewsById(id, callback) {
+    server.id = id;
+    let reviewsbyid;
     if (!window.indexedDB) {
-      server.id = id;
-      callback(null, server.requestData(REVIEWS_BY_ID));
+      reviewsbyid = await request(`${DOMAIN}/reviews/?restaurant_id=${id}`);
+      callback(null, reviewsbyid);
     }
-    else DBHelper.fetchReviews((error, reviews) => {
-      if (error) callback(error, null);
-      //console.trace('fetchReviews: reviews', reviews);
-      const results = reviews.filter(r => r.restaurant_id === parseInt(id, 10));
-      //console.trace('[fetchReviewsById]: results, id', results, id, );
-      callback (null, results);
-    });   
+    else {
+      const db = await openDB();
+      reviewsbyid = await DBHelper.serverToIDB(REVIEWSDOMAIN(id), REVIEWS_STORE, null, db)
+        .then(reviewsArray => {
+          return reviewsArray;
+        });
+      callback(null, reviewsbyid);
+    }
   }
+  
 
   /**
    * Fetch restaurants by a cuisine type with proper error handling.
@@ -387,13 +399,13 @@ class DBHelper {
         .then(async response => {
               restaurantdata = await response.json();
               //if (!restaurant) return;
-              console.log('p1:response', response);
+              //console.log('p1:response', response);
               //debugger;
-              console.log('p1:restaurant', restaurantdata);
+              //console.log('p1:restaurant', restaurantdata);
               resolve(restaurantdata);
         })
         .catch(error => {
-          console.log('unable to access server, storing data');
+          //console.log('unable to access server, storing data');
           resolve(restaurantdata);
         });
       });
@@ -402,21 +414,21 @@ class DBHelper {
         const db = await openDB();
         const store = DBHelper.getStore(RESTAURANT_STORE, db);
         if (!restaurantjson) {
-           debugger;
-          console.log('restaurantjson, db, store', restaurantjson, db, store);
+           //debugger;
+          //console.log('restaurantjson, db, store', restaurantjson, db, store);
           restaurantdata = await store.get(id);
-          console.log('restaurantdata after store.get(id)', restaurantdata);
-          debugger;
+          //console.log('restaurantdata after store.get(id)', restaurantdata);
+          //debugger;
 
           restaurantdata.synced = 0;
           restaurantdata.is_favorite = isFavorite;
         }
         else {
-          debugger;
-          console.log('restaurantjson, db, store', restaurantjson, db, store);
+          //debugger;
+          //console.log('restaurantjson, db, store', restaurantjson, db, store);
           restaurantdata = restaurantjson;
         }     
-        console.log('restaurantdata before put', restaurantdata);
+        //console.log('restaurantdata before put', restaurantdata);
         store.put(restaurantdata);
         resolve(restaurantdata); 
       });
@@ -464,13 +476,13 @@ class DBHelper {
           let result, success = true;
           try {
               transformForFetch(review, new Date());
-              let fetchurl = GET_URL(REVIEWS_BY_ID[0], REVIEWS_BY_ID[1] );
-              console.trace('addReview fetchurl:', fetchurl);
-              result = await request(`${fetchurl}`, 'POST', POST_HEADERS, review);
-              //debugger;
+              console.log('fetchurl', fetchurl);
+              console.trace('addReview fetchurl, review:', fetchurl, review);
+              result = await request(`${DOMAIN}/reviews/`, 'POST', POST_HEADERS, review);;
+              debugger;
               if (result) {
                   // Check for result null which is returned by PreFlight OPTIONS call due to cross domain access
-                  //debugger;
+                  debugger;
                   transformForClient(result);
                   result.synced = 1;
               }
@@ -485,14 +497,16 @@ class DBHelper {
           const dbService = await openDB();
           const store = await DBHelper.getStore(REVIEWS_STORE, dbService);       
           if (!success) {
-              //debugger;
+              debugger;
               const id = await store.count();
               transformForClient(result);
               result.synced = 0;
               result.id = id * -1;
               errors.push('fetch');
+              console.log('errors', errors);
           }
-          
+          console.log('store, result', store, result);
+          debugger;
           store.put(result);
       }
 
@@ -526,7 +540,7 @@ class DBHelper {
           //console.log('syncedReviews', syncedReviews);
           unsyncedReviews = await storeReviews.getAll(0);
           //console.log('syncedReviews & unsyncedReviews:', syncedReviews, unsyncedReviews);
-          if (unsyncedReviews !== 0) {
+          if (unsyncedReviews.length !== 0) {
             debugger;
             for (const review of unsyncedReviews) {
                 // cannot use foreach since that will not allow async/await
@@ -534,8 +548,9 @@ class DBHelper {
                 debugger;
                 unsyncedId = review.id;
                 transformForFetch(review);
+                console.log('transformed for fetch,', review);
                 debugger;
-                result = await request(`${DOMAIN}/reviews`, 'POST', POST_HEADERS, review);
+                result = await request(`${DOMAIN}/reviews/`, 'POST', POST_HEADERS, review);
                 console.log('unsyced review request result', result);
                 if (result) {
                     // Check for result null which is returned by PreFlight OPTIONS call due to cross domain access
@@ -560,7 +575,7 @@ class DBHelper {
     }
 
     if (syncedReviews.length > 0) {
-        storeRestaurants = await DBHelper.getStore(RESTAURANT_STORE, dbService);
+        storeReviews = await DBHelper.getStore(REVIEWS_STORE, dbService);
         syncedReviews.forEach((review) => {
             storeReviews.delete(review.unsyncedId);
             delete review.unsyncedId;
