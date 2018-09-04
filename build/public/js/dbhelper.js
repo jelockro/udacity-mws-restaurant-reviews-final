@@ -178,7 +178,7 @@ class DBHelper {
       }
       catch (error) {
         console.trace('[serverToIdb Error]', error);
-        debugger;
+        //debugger;
         Data = await DBHelper.gettingAll(storeName);
       }
       resolve(Data); 
@@ -479,10 +479,10 @@ class DBHelper {
               console.log('fetchurl', fetchurl);
               console.trace('addReview fetchurl, review:', fetchurl, review);
               result = await request(`${DOMAIN}/reviews/`, 'POST', POST_HEADERS, review);;
-              debugger;
+              //debugger;
               if (result) {
                   // Check for result null which is returned by PreFlight OPTIONS call due to cross domain access
-                  debugger;
+                  //debugger;
                   transformForClient(result);
                   result.synced = 1;
               }
@@ -497,7 +497,7 @@ class DBHelper {
           const dbService = await openDB();
           const store = await DBHelper.getStore(REVIEWS_STORE, dbService);       
           if (!success) {
-              debugger;
+              //debugger;
               const id = await store.count();
               transformForClient(result);
               result.synced = 0;
@@ -506,7 +506,7 @@ class DBHelper {
               console.log('errors', errors);
           }
           console.log('store, result', store, result);
-          debugger;
+          //debugger;
           store.put(result);
       }
 
@@ -541,15 +541,15 @@ class DBHelper {
           unsyncedReviews = await storeReviews.getAll(0);
           //console.log('syncedReviews & unsyncedReviews:', syncedReviews, unsyncedReviews);
           if (unsyncedReviews.length !== 0) {
-            debugger;
+            //debugger;
             for (const review of unsyncedReviews) {
                 // cannot use foreach since that will not allow async/await
                 console.log('review,', review);
-                debugger;
+                //debugger;
                 unsyncedId = review.id;
                 transformForFetch(review);
                 console.log('transformed for fetch,', review);
-                debugger;
+                //debugger;
                 result = await request(`${DOMAIN}/reviews/`, 'POST', POST_HEADERS, review);
                 console.log('unsyced review request result', result);
                 if (result) {
@@ -558,7 +558,7 @@ class DBHelper {
                     result.synced = 1;
                     result.unsyncedId = unsyncedId;
                     console.log('transformed result', result);
-                    debugger;
+                    //debugger;
                     console.log('syncedReviews', syncedReviews);
                     syncedReviews.push(result);  
                 }

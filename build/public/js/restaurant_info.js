@@ -374,7 +374,7 @@ addReview = async(event) => {
             reviewErrors.appendChild(container);
         }
     }
-    debugger;
+    //debugger;
     console.trace('self.restaurant.id:', self.restaurant.id);
     this.fillReviewsHTML(await DBHelper.getCachedReviews(self.restaurant.id));
     return false;
