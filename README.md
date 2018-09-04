@@ -68,6 +68,8 @@ npm run start
 
 * **Josh Lockrow** - *Initial work* - [jelockro ](https://github.com/jelockro)
 
+## Shout Outs
+I would like to thank Doug Brown and SeetD both of whose help was crucial for my finishing this project.
 
 ## License
 
