@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async function(event) {
         if (supportsNotifications && Notification.permission === "granted") {
             new Notification(message);
         } else {
-            console.log(`DOMContentLoaded: ${message}`);
+            //console.log(`DOMContentLoaded: ${message}`);
         }             
     }
   }
@@ -219,8 +219,8 @@ async function toggleFavorite(event) {
                 favoriteEmpty.setAttribute('style', 'display: inherit;');
                 favoriteAnchorMessage = `Make '${success.name}' one of your Faves`;
             }
-            console.log('after refilling what is the state: ', self.restaurant.is_favorite
-            , ' \n self.restaurant is: ', self.restaurant);
+            //console.log('after refilling what is the state: ', self.restaurant.is_favorite
+            //, ' \n self.restaurant is: ', self.restaurant);
           })
           .catch(error => console.log('DB.toggle did not work'));
     } catch (err) {console.log('nothing worked', err)};
