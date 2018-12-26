@@ -1,6 +1,8 @@
 {
-  "name": "mws-2",
-  "version": "0.2.0",
+  "name": "Restaurant Reviews",
+  "version": "0.3.0",
+  "author": "josh lockrow <jlockrow@gmail.com>",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/jelockro/mws-restaurant-stage2.git"
@@ -30,13 +32,14 @@
     "vinyl-source-stream": "^2.0.0"
   },
   "dependencies": {
+    "DBHelper": "^1.0.0",
     "babel-polyfill": "^6.26.0",
     "compression": "^1.7.3",
     "express": "^4.16.3",
     "grunt-responsive-images": "^0.1.6",
     "idb": "^2.1.3",
     "nodemon": "^1.18.3",
-    "DBHelper": "^1.0.0"
+    "webpack": "^4.28.2"
   },
   "main": "index.js",
   "scripts": {
