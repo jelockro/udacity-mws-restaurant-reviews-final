@@ -1,9 +1,13 @@
 {
-  "name": "Restaurant Review",
+  "name": "RestaurantReview",
   "version": "0.3.0",
+  "author": "Josh Lockrow <jlockrow@gmail.com>",
+  "license": "MIT",
+  "main" : "main.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jelockro/MWS-RestaurantStage3.git"
+    "url": "https://github.com/jelockro/MWS-RestaurantStage3.git",
+ 
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-rc.1",
