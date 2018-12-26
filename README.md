@@ -1,7 +1,10 @@
-# mws-restaurant-stage3
+# Mobile Restaurant Review Application
+## Udacity Mobile Web Specialist Nanodegree Final Project
 
-This the third out of 3 stage udacity mobile web development project.  
-In this stage the critera are as follows 
+There are three branches: Master, Refactor, and Simplified.  Master is the branch that was turned in to be graded.  Refactor is a newer branch that improved modularity & readability of the code by implemeting webpack and sass. 
+
+## Grading Criteria
+In this stage the critera are as follows:
 
 ## 1. Functionality
 
