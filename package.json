@@ -1,0 +1,24 @@
+{
+  "name": "refactor",
+  "version": "1.0.0",
+  "description": "There are three branches: Master, Refactor, and Simplified.  Master is the branch that was turned in to be graded.  Refactor is a newer branch that improved modularity & readability of the code by implemeting webpack and sass.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jelockro/MWS-RestaurantStage3.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jelockro/MWS-RestaurantStage3/issues"
+  },
+  "homepage": "https://github.com/jelockro/MWS-RestaurantStage3#readme",
+  "devDependencies": {
+    "webpack": "^4.28.2",
+    "webpack-cli": "^3.1.2"
+  }
+}
