@@ -49,19 +49,13 @@ sudo npm install --global gulp gulp-cli
 
 ### Installing
 
-In order to get the development environment up and running first install all the dependencies
+In order to get the environment up and running first install all the dependencies
 
 ```
 npm i
 ```
 
-then to run the development server
-
-```
-npm run start:dev
-```
-
-If you would like to run the production server, first build the app:
+then build the app:
 
 ```
 npm run build
@@ -77,6 +71,8 @@ npm run start
 
 * **Josh Lockrow** - *Initial work* - [jelockro ](https://github.com/jelockro)
 
+## Shout Outs
+I would like to thank Doug Brown and SeetD both of whose help was crucial for my finishing this project.
 
 ## License
 
