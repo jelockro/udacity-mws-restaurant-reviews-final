@@ -1,11 +1,11 @@
 {
-  "name": "Restaurant Reviews",
+  "name": "RestaurantReviews",
   "version": "0.3.0",
   "author": "josh lockrow <jlockrow@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jelockro/mws-restaurant-stage2.git"
+    "url": "https://github.com/jelockro/MWS-RestaurantStage3.git"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-rc.1",
@@ -32,7 +32,6 @@
     "vinyl-source-stream": "^2.0.0"
   },
   "dependencies": {
-    "DBHelper": "^1.0.0",
     "babel-polyfill": "^6.26.0",
     "compression": "^1.7.3",
     "express": "^4.16.3",
