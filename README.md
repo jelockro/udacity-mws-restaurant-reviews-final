@@ -45,7 +45,9 @@ What things you need to install the software and how to install them
 ```
 sudo npm install --global gulp gulp-cli
 ```
-3. clone this repository
+3. This mobile application will be sending HTTP requests to a development server that you will need to have running locally.  It can be cloned from https://github.com/udacity/mws-restaurant-stage-3.  Follow its readme instructions to install and run the server. 
+
+4. clone this repository and follow the instructions below.
 
 ### Installing
 
