@@ -81,20 +81,20 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./src/server/server.js");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./src/server/server-dev.js");
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ "./src/server/server.js":
-/*!******************************!*\
-  !*** ./src/server/server.js ***!
-  \******************************/
+/***/ "./src/server/server-dev.js":
+/*!**********************************!*\
+  !*** ./src/server/server-dev.js ***!
+  \**********************************/
 /*! no exports provided */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! path */ \"path\");\n/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var express__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! express */ \"express\");\n/* harmony import */ var express__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(express__WEBPACK_IMPORTED_MODULE_1__);\n\n //const compression = require('compression');\n// Simple no frills Express.js server that serves files from the app folder.\n\nvar app = express__WEBPACK_IMPORTED_MODULE_1___default()(),\n    DIST_DIR = __dirname,\n    HTML_FILE = path__WEBPACK_IMPORTED_MODULE_0___default.a.join(DIST_DIR, 'index.html');\napp.use(express__WEBPACK_IMPORTED_MODULE_1___default.a.static(DIST_DIR));\nconsole.log(HTML_FILE);\napp.get('*', function (req, res) {\n  res.sendFile(HTML_FILE);\n});\nvar PORT = process.env.PORT || 8080; // app.use(compression());\n// app.use('/dist/service-worker.js', (req, res) => res.sendFile(path.join(__dirname, '/service-worker.js')));\n// app.use(express.static(path.join(__dirname, 'dist')));\n// app.use(express.static(path.join(__dirname, 'app/js')));\n// app.use(express.static(path.join(__dirname, 'style/css')));\n\napp.listen(PORT, function () {\n  console.log(\"Restaurant Reviews listening on port \".concat(PORT, \"!\"));\n  console.log('Press Ctrl+C to quit.');\n});\n\n//# sourceURL=webpack:///./src/server/server.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! path */ \"path\");\n/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var express__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! express */ \"express\");\n/* harmony import */ var express__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(express__WEBPACK_IMPORTED_MODULE_1__);\n\n //const compression = require('compression');\n// Simple no frills Express.js server that serves files from the app folder.\n\nvar app = express__WEBPACK_IMPORTED_MODULE_1___default()(),\n    DIST_DIR = __dirname,\n    HTML_FILE = path__WEBPACK_IMPORTED_MODULE_0___default.a.join(DIST_DIR, 'index.html');\napp.use(express__WEBPACK_IMPORTED_MODULE_1___default.a.static(DIST_DIR));\nconsole.log(HTML_FILE);\napp.get('*', function (req, res) {\n  res.sendFile(HTML_FILE);\n});\nvar PORT = process.env.PORT || 8080; // app.use(compression());\n// app.use('/dist/service-worker.js', (req, res) => res.sendFile(path.join(__dirname, '/service-worker.js')));\n// app.use(express.static(path.join(__dirname, 'dist')));\n// app.use(express.static(path.join(__dirname, 'app/js')));\n// app.use(express.static(path.join(__dirname, 'style/css')));\n\napp.listen(PORT, function () {\n  console.log(\"Restaurant Reviews listening on port \".concat(PORT, \"!\"));\n  console.log('Press Ctrl+C to quit.');\n});\n\n//# sourceURL=webpack:///./src/server/server-dev.js?");
 
 /***/ }),
 
