@@ -14,8 +14,7 @@ module.exports = {
     //   }
   },
   entry: {
-      index: './src/index.js',
-      server: './src/server.js'
+      index: './src/index.js'
   },
   devtool: 'inline-source-map',
   devServer: {
@@ -41,13 +40,8 @@ module.exports = {
     publicPath: '/',
     path: path.resolve(__dirname, 'dist')
   },
-  target: 'node',
-  node: {
-      // Need this when working with express, otherwise the build fails
-      __dirname: false,
-      __filename: false, 
-  },
-  //externals: [nodeExternals()], // Need this to avoid error when working with express
+  target: 'web',
+
   module: {
     rules: [
     {
