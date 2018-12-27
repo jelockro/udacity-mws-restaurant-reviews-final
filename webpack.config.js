@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const nodeExternals = require('webpack-node-externals')
 const webpack = require('webpack');
 const WorkboxPlugin = require('workbox-webpack-plugin');
 
@@ -13,7 +14,8 @@ module.exports = {
     //   }
   },
   entry: {
-      index: './src/index.js'
+      index: './src/index.js',
+      server: './src/server.js'
   },
   devtool: 'inline-source-map',
   devServer: {
@@ -23,7 +25,9 @@ module.exports = {
   plugins: [
       new CleanWebpackPlugin(['dist']),
       new HtmlWebpackPlugin({
-          title: 'Progressive Web Application'
+          template: "./src/templates/index.html",
+          filename: "index.html",
+          excludeChunks: [ 'server' ]
       }),
       new webpack.HotModuleReplacementPlugin(),
       new WorkboxPlugin.GenerateSW({
@@ -34,31 +38,43 @@ module.exports = {
   output: {
     filename: '[name].bundle.js',
     chunkFilename: '[name].bundle.js',
+    publicPath: '/',
     path: path.resolve(__dirname, 'dist')
   },
-   module: {
-     rules: [
-       {
-         test: /\.js$/,
-         exclude: /node_modules/,
-         use: {
-             loader: "babel-loader"
-         }
+  target: 'node',
+  node: {
+      // Need this when working with express, otherwise the build fails
+      __dirname: false,
+      __filename: false, 
+  },
+  //externals: [nodeExternals()], // Need this to avoid error when working with express
+  module: {
+    rules: [
+    {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+            loader: "babel-loader"
+        }
 
-       },
-       {
-         test: /\.css$/,
-         use: [
-           'style-loader',
-           'css-loader'
-         ]
-       },
-       {
-           test: /\.(png|svg|jpg|gif)$/,
-           use: [
-               'file-loader'
-           ]
-       }
-     ]
-   }
+    },
+    {
+        test: /\.css$/,
+        use: [
+        'style-loader',
+        'css-loader'
+        ]
+    },
+    {
+        test: /\.(png|svg|jpg|gif)$/,
+        use: [
+            'file-loader'
+        ]
+    },
+    {
+        test: /\.html$/,
+        use: {loader: "html-loader"}
+    }
+    ]
+  }
 };
