@@ -14,7 +14,7 @@ module.exports = {
     //   }
   },
   entry: {
-      index: './src/index.js'
+    main: ['webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000', './src/index.js']
   },
   devtool: 'inline-source-map',
 //  *** Used with webpack-dev-server ***
@@ -35,6 +35,7 @@ module.exports = {
           clientsClaim: true,
           skipWaiting: true
       }),
+      new webpack.HotModuleReplacementPlugin(),
       new webpack.NoEmitOnErrorsPlugin()
 
   ],
