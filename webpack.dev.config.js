@@ -1,12 +1,12 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const nodeExternals = require('webpack-node-externals')
 const webpack = require('webpack');
 const WorkboxPlugin = require('workbox-webpack-plugin');
 
 module.exports = {
   mode: 'development',
+  target: 'web',
   optimization: {
       usedExports: true
     //   ,splitChunks: {
@@ -17,10 +17,11 @@ module.exports = {
       index: './src/index.js'
   },
   devtool: 'inline-source-map',
-  devServer: {
-      contentBase: './dist',
-      hot: true
-  },
+//  *** Used with webpack-dev-server ***
+//   devServer: {
+//       contentBase: './dist',
+//       hot: true
+//   },
   plugins: [
       new CleanWebpackPlugin(['dist']),
       new HtmlWebpackPlugin({
@@ -28,20 +29,21 @@ module.exports = {
           filename: "index.html",
           excludeChunks: [ 'server' ]
       }),
-      new webpack.HotModuleReplacementPlugin(),
+    //  *** Used with webpack-dev-server ****  
+    //   new webpack.HotModuleReplacementPlugin(),
       new WorkboxPlugin.GenerateSW({
           clientsClaim: true,
           skipWaiting: true
-      })
+      }),
+      new webpack.NoEmitOnErrorsPlugin()
+
   ],
   output: {
+    path: path.resolve(__dirname, 'dist'),
     filename: '[name].bundle.js',
     chunkFilename: '[name].bundle.js',
-    publicPath: '/',
-    path: path.resolve(__dirname, 'dist')
+    publicPath: '/'
   },
-  target: 'web',
-
   module: {
     rules: [
     {
@@ -67,7 +69,10 @@ module.exports = {
     },
     {
         test: /\.html$/,
-        use: {loader: "html-loader"}
+        use: {
+            loader: "html-loader",
+            //options: { minimize: true }
+        }
     }
     ]
   }
