@@ -6,6 +6,7 @@ const WorkboxPlugin = require('workbox-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin")
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin")
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   mode: 'production',
@@ -42,7 +43,10 @@ module.exports = {
       new MiniCssExtractPlugin({
           filename: "[name].css",
           chunkFilename: "[id].css"
-      })
+      }),
+      new CopyWebpackPlugin([
+         {from: "./src/img/", to: "img"}
+      ]),
   ],
   output: {
     filename: '[name].bundle.js',

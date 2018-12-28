@@ -2,25 +2,25 @@ import path from 'path'
 import express from 'express'
 //const compression = require('compression');
 
-// Simple no frills Express.js server that serves files from the app folder.
-const app = express(),
-    DIST_DIR = __dirname,
-    HTML_FILE = path.join(DIST_DIR, 'index.html')
-app.use(express.static(DIST_DIR))
-console.log(HTML_FILE);
+// Dynamic production server
+// const app = express(),
+//     DIST_DIR = __dirname,
+//     HTML_FILE = path.join(DIST_DIR, 'index.html')
+// app.use(express.static(DIST_DIR))
+// console.log(HTML_FILE);
 
-app.get('*', (req, res) => {
-    res.sendFile(HTML_FILE)
-})
+// app.get('*', (req, res) => {
+//     res.sendFile(HTML_FILE)
+// })
 
 const PORT = process.env.PORT || 8080
 
-
-// app.use(compression());
-// app.use('/dist/service-worker.js', (req, res) => res.sendFile(path.join(__dirname, '/service-worker.js')));
-// app.use(express.static(path.join(__dirname, 'dist')));
-// app.use(express.static(path.join(__dirname, 'app/js')));
-// app.use(express.static(path.join(__dirname, 'style/css')));
+// Simple no frils server that serves static files from public folders
+app.use(compression());
+app.use('/dist/service-worker.js', (req, res) => res.sendFile(path.join(__dirname, '/service-worker.js')));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public/js')));
+app.use(express.static(path.join(__dirname, 'public/css')));
 
 app.listen(PORT, () => {
     console.log(`Restaurant Reviews listening on port ${PORT}!`);
