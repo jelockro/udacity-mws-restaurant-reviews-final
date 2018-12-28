@@ -1,5 +1,5 @@
 const path = require('path');
-//const HtmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const webpack = require('webpack');
 const WorkboxPlugin = require('workbox-webpack-plugin');
@@ -48,21 +48,23 @@ module.exports = {
   module: {
     rules: [
     {
+        test: /\.(scss|sass)$/,
+            use: ["style-loader", "css-loader", {
+            loader: "fast-sass-loader",
+            options: {
+                includePaths: ["./src/styles/scss", "./src/styles/sass"]
+                }
+            }]
+    },
+    {
         test: /\.js$/,
-        exclude: /node_modules/,
+        exclude: /node_modules/, 
         use: {
             loader: "babel-loader"
         }
 
     },
-    {
-        test: /\.(scss|css)$/,
-        use: [
-        'style-loader',
-        'css-loader',
-        'sass-loader'
-        ]
-    },
+ 
     {
         test: /\.(png|svg|jpg|gif)$/,
         use: [

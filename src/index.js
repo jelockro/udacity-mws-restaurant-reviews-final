@@ -1,5 +1,6 @@
 import _ from 'lodash';
-import './styles.css';
+import "./styles/scss/index.scss";
+
 import printMe from './print.js';
 import "./templates/index.html";
 
