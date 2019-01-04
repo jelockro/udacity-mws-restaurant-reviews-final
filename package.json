@@ -8,7 +8,7 @@
     "buildDev": "webpack --config webpack.dev.config.js && webpack --mode development  --config webpack.server.config.js ",
     "buildProd": "webpack --config webpack.prod.config.js && webpack --mode production  --config webpack.server.config.js ",
     "watch": "webpack --watch",
-    "start-dev-server": "nodemon --watch webpack.prod.config.js --exec \"webpack-dev-server  --open\"",
+    "start-dev-server": "nodemon --watch webpack.dev.config.js --exec \"webpack-dev-server --config webpack.dev.config.js --open\"",
     "express": "nodemon --watch webpack.prod.config.js --exec \"node ./dist/server.js\""
   },
   "jest": {
