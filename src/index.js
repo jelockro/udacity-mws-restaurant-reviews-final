@@ -2,7 +2,7 @@ import _ from 'lodash';
 import "./styles/scss/index.scss";
 import "./js/fetchJson.js";
 import "./templates/index.html";
-import fetchRestaurants, { fetchRestaurantById, fetchRestaurantByCuisine, fetchRestaurantByNeighborhood, fetchNeighborhoods } from './js/restaurantController';
+import fetchRestaurants, { fetchRestaurantById, fetchRestaurantByCuisine, fetchRestaurantByNeighborhood, fetchNeighborhoods, fetchCuisines } from './js/restaurantController';
 
 // *** Removing service worker for faster styling development ****
 
@@ -22,7 +22,7 @@ fetchRestaurantById(3).then(result => {console.log(result)})
 fetchRestaurantByCuisine("Asian").then(result =>{console.log(result)})
 fetchRestaurantByNeighborhood("Manhattan").then(result =>{console.log(result)})
 fetchNeighborhoods().then(result=>{console.log(result)})
-
+fetchCuisines().then(result=>{console.log(result)})
 
 if (module.hot) {
     module.hot.accept('./js/restaurantController', function() {

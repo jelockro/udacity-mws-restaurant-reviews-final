@@ -59,3 +59,16 @@ export function fetchNeighborhoods() {
         })
     })
 }
+
+export function fetchCuisines() {
+    return new Promise ((resolve) => {
+        fetchRestaurants().then(restaurantJson => {
+            let restaurantArray = restaurantJson;
+            let cuisines = restaurantArray.map((objectIndex, restaurant) => restaurantArray[restaurant].cuisine_type);
+            const uniqueCuisines = cuisines.filter((cuisine_type, currentIndex) => cuisines.indexOf(cuisine_type) === currentIndex);
+            resolve(uniqueCuisines);
+        }).catch(e => {
+            console.log("unable to filter the results:", e);
+        })
+    })
+}
