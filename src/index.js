@@ -1,9 +1,8 @@
 import _ from 'lodash';
 import "./styles/scss/index.scss";
 import "./js/fetchJson.js";
-import printMe from './print.js';
 import "./templates/index.html";
-import fetchJson from './js/fetchJson.js';
+import fetchRestaurants from './js/restaurantController';
 
 // *** Removing service worker for faster styling development ****
 
@@ -18,12 +17,11 @@ import fetchJson from './js/fetchJson.js';
 //     });
 // }
 
-fetchJson('http://localhost:1337/restaurants').then(data => {console.log(data)});
-
+fetchRestaurants().then(result => {console.log(result)})
 
 if (module.hot) {
-    module.hot.accept('./js/fetchJson', function() {
-    console.log('Accepting the updated fetchJson module!');
-    printMe();
+    module.hot.accept('./js/restaurantController', function() {
+    console.log('Accepting the updated fetchRestaurant module!');
+    fetchRestaurants();
 }) 
 }
