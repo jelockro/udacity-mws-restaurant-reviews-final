@@ -36,3 +36,14 @@ export function fetchRestaurantByCuisine(cuisine) {
         })
     })
 }
+
+export function fetchRestaurantByNeighborhood(neighborhood) {
+    return new Promise ((resolve) => {
+        fetchRestaurants().then(restaurantArray => {
+            let restaurantsFilteredByNeighborhood = restaurantArray.filter(r => r.neighborhood === neighborhood);
+            resolve(restaurantsFilteredByNeighborhood);
+        }).catch(e => {
+            console.log("unable to filter the results:", e);
+        })
+    })
+}
