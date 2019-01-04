@@ -16,7 +16,7 @@ export default function fetchRestaurants() {
 
 export function fetchRestaurantById(id) {
     return new Promise ((resolve) => {
-        fetchJson(RESTAURANTS_URL.concat('/', String(id))).then(jsonData => {
+        fetchJson(RESTAURANTS_URL.concat(`/${id}`)).then(jsonData => {
             let restaurantData = jsonData;
             resolve(restaurantData);
         }).catch(e => {
@@ -72,3 +72,8 @@ export function fetchCuisines() {
         })
     })
 }
+
+// takes restaurant object as argument
+export function getURLQuery(restaurant) {
+    return (`./restaurant.html?id=${restaurant.id}`);
+  }

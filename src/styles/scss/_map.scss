@@ -1,0 +1,19 @@
+#map {
+    height: 400px;
+    width: 100%;
+    background-color: #ccc;
+  }
+.inside #map-container {
+    background: blue none repeat scroll 0 0;
+    height: 157px;
+  /*  position: fixed;
+    right: 0;
+    top: 80px;
+    width: 50%;
+   */
+  }
+  .inside #map {
+    background-color: #ccc;
+    height: 100%;
+    width: 100%;
+  }
