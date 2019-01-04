@@ -2,7 +2,7 @@ import _ from 'lodash';
 import "./styles/scss/index.scss";
 import "./js/fetchJson.js";
 import "./templates/index.html";
-import fetchRestaurants, { fetchRestaurantById } from './js/restaurantController';
+import fetchRestaurants, { fetchRestaurantById, fetchRestaurantByCuisine } from './js/restaurantController';
 
 // *** Removing service worker for faster styling development ****
 
@@ -19,6 +19,8 @@ import fetchRestaurants, { fetchRestaurantById } from './js/restaurantController
 
 fetchRestaurants().then(result => {console.log(result)})
 fetchRestaurantById(3).then(result => {console.log(result)})
+fetchRestaurantByCuisine("Asian").then(result =>{console.log(result)})
+
 if (module.hot) {
     module.hot.accept('./js/restaurantController', function() {
     console.log('Accepting the updated fetchRestaurant module!');

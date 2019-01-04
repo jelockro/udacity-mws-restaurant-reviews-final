@@ -25,3 +25,14 @@ export function fetchRestaurantById(id) {
         })
     })
 }
+
+export function fetchRestaurantByCuisine(cuisine) {
+    return new Promise ((resolve) => {
+        fetchRestaurants().then(restaurantArray => {
+            let restaurantsFilteredByCusisine = restaurantArray.filter(r => r.cuisine_type === cuisine);
+            resolve(restaurantsFilteredByCusisine);
+        }).catch(e => {
+            console.log("unable to filter the results:", e);
+        })
+    })
+}
