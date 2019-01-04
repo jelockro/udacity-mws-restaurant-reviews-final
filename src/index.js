@@ -2,8 +2,9 @@ import _ from 'lodash';
 import "./styles/scss/index.scss";
 import "./js/fetchJson.js";
 import "./templates/index.html";
-import initMap, {addMarkersToMap} from "./js/map";
-import fetchRestaurants, { fetchRestaurantById, fetchRestaurantByCuisine, fetchRestaurantByNeighborhood, fetchNeighborhoods, fetchCuisines } from './js/restaurantController';
+import initMap, {addMarkersToMap} from "./js/mapController";
+import { fetchRestaurants, fetchRestaurantById, fetchRestaurantByCuisine, fetchRestaurantByNeighborhood, fetchNeighborhoods, fetchCuisines } from './js/restaurantDataController';
+import { updateRestaurants } from './js/restaurantDisplayController';
 
 // *** Removing service worker for faster styling development ****
 
@@ -18,16 +19,16 @@ import fetchRestaurants, { fetchRestaurantById, fetchRestaurantByCuisine, fetchR
 //     });
 // }
 
-fetchRestaurants().then(result => {console.log(result)})
-fetchRestaurantById(3).then(result => {console.log(result)})
-fetchRestaurantByCuisine("Asian").then(result =>{console.log(result)})
-fetchRestaurantByNeighborhood("Manhattan").then(result =>{console.log(result)})
-fetchNeighborhoods().then(result=>{console.log(result)})
-fetchCuisines().then(result=>{console.log(result)})
-initMap()
-addMarkersToMap(fetchRestaurants())
+
+
+document.addEventListener('DOMContentLoaded', (event) => {
+    //debugger;
+    initMap(); // added
+    addMarkersToMap(fetchRestaurants())
+    updateRestaurants()
+  });
 if (module.hot) {
-    module.hot.accept('./js/restaurantController', function() {
+    module.hot.accept('./js/restaurantDataController', function() {
     console.log('Accepting the updated fetchRestaurant module!');
     fetchRestaurants();
 }) 

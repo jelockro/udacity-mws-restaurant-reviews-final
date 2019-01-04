@@ -2,7 +2,7 @@ import fetchJson from './fetchJson.js';
 const RESTAURANTS_URL = "http://localhost:1337/restaurants";
 
 
-export default function fetchRestaurants() {
+export function fetchRestaurants() {
 // if not offline capable
     return new Promise ((resolve) => {
         fetchJson(RESTAURANTS_URL).then(jsonData => {
@@ -47,6 +47,30 @@ export function fetchRestaurantByNeighborhood(neighborhood) {
     })
 }
 
+export function fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood) {
+    return new Promise ((resolve) => {
+        console.log('fetching by cuisine & Neighborhood')
+        fetchRestaurants().then(restaurantObjectArray => {
+            let filteredByCuisineAndNeighborhood = [];
+            if (cuisine !== 'all') {
+                filteredByCuisineAndNeighborhood = restaurantObjectArray.filter((objectIndex, restaurant) => restaurant.cuisine_type === cuisine_type);
+            }
+
+            else if (neighborhood !== 'all') {
+                filteredByCuisineAndNeighborhood = restaurantObjectArray.filter((objectIndex, restaurant) => restaurant.neighborhood === neighborhood);
+            } 
+            else {
+                Object.keys(restaurantObjectArray).forEach(key => {
+                    filteredByCuisineAndNeighborhood.push(restaurantObjectArray[key]);  // the value of the current key.
+                });
+            }
+            resolve(filteredByCuisineAndNeighborhood);
+        }).catch(e => {
+            console.log("unable to filter the results:", e);
+        })
+    })
+}
+
 export function fetchNeighborhoods() {
     return new Promise ((resolve) => {
         fetchRestaurants().then(restaurantJson => {
@@ -76,4 +100,8 @@ export function fetchCuisines() {
 // takes restaurant object as argument
 export function getURLQuery(restaurant) {
     return (`./restaurant.html?id=${restaurant.id}`);
+  }
+
+export function getImageURLQuery(restaurant, type) {
+    return (`/img/${type}/${restaurant.photograph}`);
   }

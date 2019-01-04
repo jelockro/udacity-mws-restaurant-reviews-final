@@ -1,5 +1,4 @@
-import getURLQuery from "./restaurantController";
-import fetchRestaurants from "./restaurantController";
+import { getURLQuery,fetchRestaurants} from "./restaurantDataController";
 
 let markers = []
 
@@ -29,10 +28,7 @@ export default function initMap() {
 export function addMarkersToMap() {
     fetchRestaurants().then(objectArray => {
         objectArray.forEach(restaurant => {
-            // Add marker to the map
-            console.log('this should be a restaurant object', restaurant);
             const marker = mapMarkerForRestaurant(restaurant, self.newMap);
-            console.log("this should still be a marker", marker);
             marker.on("click", onClick);
             function onClick() {
               window.location.href = marker.options.url;
@@ -55,7 +51,6 @@ export function mapMarkerForRestaurant(restaurant, map) {
         url: getURLQuery(restaurant)
         })
         marker.addTo(self.newMap);
-    console.log("this should be a marker:", marker);
     return marker;
 }
 /**
